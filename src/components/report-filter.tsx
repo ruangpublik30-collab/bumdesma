@@ -20,7 +20,7 @@ export function ReportFilter({
   showConsolidate?: boolean;
   showDateRange?: boolean;
 }) {
-  const { isSuperAdmin, unitId } = useAuth();
+  const { isSuperAdmin } = useAuth();
   const { data: units } = useQuery({
     queryKey: ["units"],
     enabled: isSuperAdmin,
