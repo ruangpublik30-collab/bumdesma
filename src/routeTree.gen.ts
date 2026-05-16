@@ -9,38 +9,174 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnitsRouteImport } from './routes/units'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as JurnalRouteImport } from './routes/jurnal'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LaporanNeracaRouteImport } from './routes/laporan.neraca'
+import { Route as LaporanLabaRugiRouteImport } from './routes/laporan.laba-rugi'
+import { Route as LaporanKonsolidasiRouteImport } from './routes/laporan.konsolidasi'
+import { Route as LaporanArusKasRouteImport } from './routes/laporan.arus-kas'
 
+const UnitsRoute = UnitsRouteImport.update({
+  id: '/units',
+  path: '/units',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JurnalRoute = JurnalRouteImport.update({
+  id: '/jurnal',
+  path: '/jurnal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LaporanNeracaRoute = LaporanNeracaRouteImport.update({
+  id: '/laporan/neraca',
+  path: '/laporan/neraca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LaporanLabaRugiRoute = LaporanLabaRugiRouteImport.update({
+  id: '/laporan/laba-rugi',
+  path: '/laporan/laba-rugi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LaporanKonsolidasiRoute = LaporanKonsolidasiRouteImport.update({
+  id: '/laporan/konsolidasi',
+  path: '/laporan/konsolidasi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LaporanArusKasRoute = LaporanArusKasRouteImport.update({
+  id: '/laporan/arus-kas',
+  path: '/laporan/arus-kas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/jurnal': typeof JurnalRoute
+  '/login': typeof LoginRoute
+  '/units': typeof UnitsRoute
+  '/laporan/arus-kas': typeof LaporanArusKasRoute
+  '/laporan/konsolidasi': typeof LaporanKonsolidasiRoute
+  '/laporan/laba-rugi': typeof LaporanLabaRugiRoute
+  '/laporan/neraca': typeof LaporanNeracaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/jurnal': typeof JurnalRoute
+  '/login': typeof LoginRoute
+  '/units': typeof UnitsRoute
+  '/laporan/arus-kas': typeof LaporanArusKasRoute
+  '/laporan/konsolidasi': typeof LaporanKonsolidasiRoute
+  '/laporan/laba-rugi': typeof LaporanLabaRugiRoute
+  '/laporan/neraca': typeof LaporanNeracaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/jurnal': typeof JurnalRoute
+  '/login': typeof LoginRoute
+  '/units': typeof UnitsRoute
+  '/laporan/arus-kas': typeof LaporanArusKasRoute
+  '/laporan/konsolidasi': typeof LaporanKonsolidasiRoute
+  '/laporan/laba-rugi': typeof LaporanLabaRugiRoute
+  '/laporan/neraca': typeof LaporanNeracaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/jurnal'
+    | '/login'
+    | '/units'
+    | '/laporan/arus-kas'
+    | '/laporan/konsolidasi'
+    | '/laporan/laba-rugi'
+    | '/laporan/neraca'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/jurnal'
+    | '/login'
+    | '/units'
+    | '/laporan/arus-kas'
+    | '/laporan/konsolidasi'
+    | '/laporan/laba-rugi'
+    | '/laporan/neraca'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/jurnal'
+    | '/login'
+    | '/units'
+    | '/laporan/arus-kas'
+    | '/laporan/konsolidasi'
+    | '/laporan/laba-rugi'
+    | '/laporan/neraca'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
+  JurnalRoute: typeof JurnalRoute
+  LoginRoute: typeof LoginRoute
+  UnitsRoute: typeof UnitsRoute
+  LaporanArusKasRoute: typeof LaporanArusKasRoute
+  LaporanKonsolidasiRoute: typeof LaporanKonsolidasiRoute
+  LaporanLabaRugiRoute: typeof LaporanLabaRugiRoute
+  LaporanNeracaRoute: typeof LaporanNeracaRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/units': {
+      id: '/units'
+      path: '/units'
+      fullPath: '/units'
+      preLoaderRoute: typeof UnitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jurnal': {
+      id: '/jurnal'
+      path: '/jurnal'
+      fullPath: '/jurnal'
+      preLoaderRoute: typeof JurnalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +184,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/laporan/neraca': {
+      id: '/laporan/neraca'
+      path: '/laporan/neraca'
+      fullPath: '/laporan/neraca'
+      preLoaderRoute: typeof LaporanNeracaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/laporan/laba-rugi': {
+      id: '/laporan/laba-rugi'
+      path: '/laporan/laba-rugi'
+      fullPath: '/laporan/laba-rugi'
+      preLoaderRoute: typeof LaporanLabaRugiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/laporan/konsolidasi': {
+      id: '/laporan/konsolidasi'
+      path: '/laporan/konsolidasi'
+      fullPath: '/laporan/konsolidasi'
+      preLoaderRoute: typeof LaporanKonsolidasiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/laporan/arus-kas': {
+      id: '/laporan/arus-kas'
+      path: '/laporan/arus-kas'
+      fullPath: '/laporan/arus-kas'
+      preLoaderRoute: typeof LaporanArusKasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
+  JurnalRoute: JurnalRoute,
+  LoginRoute: LoginRoute,
+  UnitsRoute: UnitsRoute,
+  LaporanArusKasRoute: LaporanArusKasRoute,
+  LaporanKonsolidasiRoute: LaporanKonsolidasiRoute,
+  LaporanLabaRugiRoute: LaporanLabaRugiRoute,
+  LaporanNeracaRoute: LaporanNeracaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
