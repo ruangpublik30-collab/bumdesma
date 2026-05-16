@@ -14,16 +14,270 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      business_units: {
+        Row: {
+          created_at: string
+          id: string
+          jenis_unit: string
+          kode_unit: string
+          nama_unit: string
+          status: Database["public"]["Enums"]["unit_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jenis_unit: string
+          kode_unit: string
+          nama_unit: string
+          status?: Database["public"]["Enums"]["unit_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jenis_unit?: string
+          kode_unit?: string
+          nama_unit?: string
+          status?: Database["public"]["Enums"]["unit_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      chart_of_accounts: {
+        Row: {
+          created_at: string
+          id: string
+          kode: string
+          nama: string
+          tipe: Database["public"]["Enums"]["account_type"]
+          unit_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kode: string
+          nama: string
+          tipe: Database["public"]["Enums"]["account_type"]
+          unit_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kode?: string
+          nama?: string
+          tipe?: Database["public"]["Enums"]["account_type"]
+          unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "business_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coa_template_global: {
+        Row: {
+          created_at: string
+          id: string
+          kode: string
+          nama: string
+          tipe: Database["public"]["Enums"]["account_type"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kode: string
+          nama: string
+          tipe: Database["public"]["Enums"]["account_type"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kode?: string
+          nama?: string
+          tipe?: Database["public"]["Enums"]["account_type"]
+        }
+        Relationships: []
+      }
+      coa_template_unit: {
+        Row: {
+          created_at: string
+          id: string
+          kode: string
+          nama: string
+          tipe: Database["public"]["Enums"]["account_type"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kode: string
+          nama: string
+          tipe: Database["public"]["Enums"]["account_type"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kode?: string
+          nama?: string
+          tipe?: Database["public"]["Enums"]["account_type"]
+        }
+        Relationships: []
+      }
+      journal_items: {
+        Row: {
+          account_id: string
+          debit: number
+          deskripsi: string | null
+          id: string
+          journal_id: string
+          kredit: number
+          unit_id: string
+        }
+        Insert: {
+          account_id: string
+          debit?: number
+          deskripsi?: string | null
+          id?: string
+          journal_id: string
+          kredit?: number
+          unit_id: string
+        }
+        Update: {
+          account_id?: string
+          debit?: number
+          deskripsi?: string | null
+          id?: string
+          journal_id?: string
+          kredit?: number
+          unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_items_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_items_journal_id_fkey"
+            columns: ["journal_id"]
+            isOneToOne: false
+            referencedRelation: "journals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_items_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "business_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journals: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deskripsi: string | null
+          id: string
+          nomor: string
+          tanggal: string
+          unit_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deskripsi?: string | null
+          id?: string
+          nomor: string
+          tanggal?: string
+          unit_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deskripsi?: string | null
+          id?: string
+          nomor?: string
+          tanggal?: string
+          unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journals_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "business_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          unit_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          unit_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          unit_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "business_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_access_unit: {
+        Args: { _unit_id: string; _user_id: string }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      user_unit_ids: { Args: { _user_id: string }; Returns: string[] }
     }
     Enums: {
-      [_ in never]: never
+      account_type:
+        | "ASET"
+        | "KEWAJIBAN"
+        | "EKUITAS"
+        | "PENDAPATAN"
+        | "HPP"
+        | "BEBAN"
+      app_role: "super_admin" | "admin_unit"
+      unit_status: "aktif" | "nonaktif"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +404,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_type: [
+        "ASET",
+        "KEWAJIBAN",
+        "EKUITAS",
+        "PENDAPATAN",
+        "HPP",
+        "BEBAN",
+      ],
+      app_role: ["super_admin", "admin_unit"],
+      unit_status: ["aktif", "nonaktif"],
+    },
   },
 } as const
