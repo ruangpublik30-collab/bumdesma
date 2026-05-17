@@ -22,6 +22,7 @@ export type Database = {
           kode_unit: string
           nama_unit: string
           status: Database["public"]["Enums"]["unit_status"]
+          template_id: string | null
           updated_at: string
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           kode_unit: string
           nama_unit: string
           status?: Database["public"]["Enums"]["unit_status"]
+          template_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -40,9 +42,18 @@ export type Database = {
           kode_unit?: string
           nama_unit?: string
           status?: Database["public"]["Enums"]["unit_status"]
+          template_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "business_units_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "unit_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chart_of_accounts: {
         Row: {
@@ -109,6 +120,7 @@ export type Database = {
           id: string
           kode: string
           nama: string
+          template_id: string
           tipe: Database["public"]["Enums"]["account_type"]
         }
         Insert: {
@@ -116,6 +128,7 @@ export type Database = {
           id?: string
           kode: string
           nama: string
+          template_id: string
           tipe: Database["public"]["Enums"]["account_type"]
         }
         Update: {
@@ -123,9 +136,18 @@ export type Database = {
           id?: string
           kode?: string
           nama?: string
+          template_id?: string
           tipe?: Database["public"]["Enums"]["account_type"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "coa_template_unit_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "unit_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       journal_items: {
         Row: {
@@ -216,6 +238,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      unit_templates: {
+        Row: {
+          created_at: string
+          deskripsi: string | null
+          id: string
+          is_default: boolean
+          kode_template: string
+          nama_template: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deskripsi?: string | null
+          id?: string
+          is_default?: boolean
+          kode_template: string
+          nama_template: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deskripsi?: string | null
+          id?: string
+          is_default?: boolean
+          kode_template?: string
+          nama_template?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
