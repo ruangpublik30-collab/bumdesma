@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { createBusinessUnit } from "@/lib/units.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,19 +19,51 @@ export const Route = createFileRoute("/units")({
   component: () => <Protected requireSuper><UnitsPage /></Protected>,
 });
 
-const JENIS = ["Dagang", "Simpan Pinjam", "Budidaya / Ketahanan Pangan", "Jasa", "Air Bersih", "Wisata", "Lainnya"];
+const CUSTOM = "__custom__";
 
 function UnitsPage() {
   const qc = useQueryClient();
   const create = useServerFn(createBusinessUnit);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ nama_unit: "", kode_unit: "", jenis_unit: JENIS[0], email_admin: "", password: "" });
   const [busy, setBusy] = useState(false);
+
+  const { data: templates } = useQuery({
+    queryKey: ["unit-templates"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("unit_templates" as never)
+        .select("id, nama_template, kode_template, deskripsi, is_default")
+        .order("nama_template");
+      if (error) throw error;
+      return (data ?? []) as Array<{ id: string; nama_template: string; kode_template: string; deskripsi: string | null; is_default: boolean }>;
+    },
+  });
+
+  const [form, setForm] = useState({
+    nama_unit: "",
+    kode_unit: "",
+    template_choice: CUSTOM as string,
+    jenis_unit_custom: "",
+    email_admin: "",
+    password: "",
+  });
+
+  // Default ke template "default" jika tersedia (pertama kali templates termuat)
+  useEffect(() => {
+    if (templates && templates.length > 0 && form.template_choice === CUSTOM) {
+      const def = templates.find((t) => t.is_default) ?? templates[0];
+      setForm((f) => ({ ...f, template_choice: def.id }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [templates]);
 
   const { data: units, isLoading } = useQuery({
     queryKey: ["units"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("business_units").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("business_units")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -41,23 +73,57 @@ function UnitsPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      await create({ data: form });
-      toast.success(`Unit "${form.nama_unit}" berhasil dibuat. COA & login admin otomatis disiapkan.`);
+      const isCustom = form.template_choice === CUSTOM;
+      const tpl = !isCustom ? templates?.find((t) => t.id === form.template_choice) : null;
+      const jenis = isCustom ? form.jenis_unit_custom.trim() : tpl?.nama_template ?? "Custom";
+      if (isCustom && !jenis) {
+        toast.error("Isi nama jenis unit custom.");
+        setBusy(false);
+        return;
+      }
+      await create({
+        data: {
+          nama_unit: form.nama_unit,
+          kode_unit: form.kode_unit,
+          jenis_unit: jenis,
+          template_id: isCustom ? null : form.template_choice,
+          email_admin: form.email_admin,
+          password: form.password,
+        },
+      });
+      toast.success(`Unit "${form.nama_unit}" berhasil dibuat. COA & login admin disiapkan otomatis.`);
       setOpen(false);
-      setForm({ nama_unit: "", kode_unit: "", jenis_unit: JENIS[0], email_admin: "", password: "" });
+      const def = templates?.find((t) => t.is_default) ?? templates?.[0];
+      setForm({
+        nama_unit: "",
+        kode_unit: "",
+        template_choice: def?.id ?? CUSTOM,
+        jenis_unit_custom: "",
+        email_admin: "",
+        password: "",
+      });
       qc.invalidateQueries({ queryKey: ["units"] });
       qc.invalidateQueries({ queryKey: ["units-summary"] });
     } catch (err: any) {
       toast.error(err?.message ?? "Gagal membuat unit");
-    } finally { setBusy(false); }
+    } finally {
+      setBusy(false);
+    }
   };
+
+  const selectedTplDesc =
+    form.template_choice !== CUSTOM
+      ? templates?.find((t) => t.id === form.template_choice)?.deskripsi
+      : "Sistem hanya menyiapkan bagan akun universal. Admin dapat menambah akun sendiri nanti.";
 
   return (
     <div className="space-y-6">
       <div className="flex items-end justify-between">
         <div>
           <h2 className="font-display text-2xl font-bold">Manajemen Unit Usaha</h2>
-          <p className="text-sm text-muted-foreground">Tambah unit baru — sistem otomatis menyiapkan bagan akun, login admin, dan modul laporan.</p>
+          <p className="text-sm text-muted-foreground">
+            Tambah unit baru — sistem otomatis menyiapkan bagan akun, login admin, dan modul laporan.
+          </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -76,15 +142,35 @@ function UnitsPage() {
                   <Input required value={form.kode_unit} onChange={(e) => setForm({ ...form, kode_unit: e.target.value.toUpperCase() })} placeholder="DGG" />
                 </div>
               </div>
+
               <div className="space-y-2">
-                <Label>Jenis Unit</Label>
-                <Select value={form.jenis_unit} onValueChange={(v) => setForm({ ...form, jenis_unit: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Label>Template Unit (opsional)</Label>
+                <Select value={form.template_choice} onValueChange={(v) => setForm({ ...form, template_choice: v })}>
+                  <SelectTrigger><SelectValue placeholder="Pilih template…" /></SelectTrigger>
                   <SelectContent>
-                    {JENIS.map((j) => <SelectItem key={j} value={j}>{j}</SelectItem>)}
+                    {(templates ?? []).map((t) => (
+                      <SelectItem key={t.id} value={t.id}>{t.nama_template}</SelectItem>
+                    ))}
+                    <SelectItem value={CUSTOM}>Custom Unit (tanpa template)</SelectItem>
                   </SelectContent>
                 </Select>
+                {selectedTplDesc && (
+                  <p className="text-xs text-muted-foreground">{selectedTplDesc}</p>
+                )}
               </div>
+
+              {form.template_choice === CUSTOM && (
+                <div className="space-y-2">
+                  <Label>Nama Jenis Unit (Custom)</Label>
+                  <Input
+                    required
+                    value={form.jenis_unit_custom}
+                    onChange={(e) => setForm({ ...form, jenis_unit_custom: e.target.value })}
+                    placeholder="cth: Energi Surya Desa"
+                  />
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label>Email Admin Unit</Label>
                 <Input type="email" required value={form.email_admin} onChange={(e) => setForm({ ...form, email_admin: e.target.value })} placeholder="admin.dagang@bumdes.id" />
