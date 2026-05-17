@@ -8,17 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
 import { formatIDR, formatDate } from "@/lib/format";
 
 export const Route = createFileRoute("/jurnal")({
-  head: () => ({ meta: [{ title: "Jurnal — ERP BUMDes" }] }),
+  head: () => ({ meta: [{ title: "Transaksi — ERP BUMDes" }] }),
   component: () => <Protected><JurnalPage /></Protected>,
 });
 
-interface JurnalRow { id: string; tanggal: string; nomor: string; deskripsi: string | null; unit_id: string; }
+type Akun = { id: string; kode: string; nama: string; tipe: string };
 
 function JurnalPage() {
   const { isSuperAdmin, unitId } = useAuth();
@@ -51,8 +51,10 @@ function JurnalPage() {
     <div className="space-y-6">
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="font-display text-2xl font-bold">Jurnal Umum</h2>
-          <p className="text-sm text-muted-foreground">Catatan transaksi double-entry per unit.</p>
+          <h2 className="font-display text-2xl font-bold">Catat Transaksi</h2>
+          <p className="text-sm text-muted-foreground">
+            Catat pemasukan & pengeluaran kas. Sistem otomatis menyusun jurnal double-entry — Anda tidak perlu tahu debit/kredit.
+          </p>
         </div>
         <div className="flex items-end gap-3">
           {isSuperAdmin && (
@@ -70,9 +72,15 @@ function JurnalPage() {
           )}
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button disabled={!activeUnit}><Plus className="h-4 w-4 mr-1" /> Jurnal Baru</Button>
+              <Button disabled={!activeUnit}><Plus className="h-4 w-4 mr-1" /> Transaksi Baru</Button>
             </DialogTrigger>
-            <NewJournalDialog unitId={activeUnit!} onSaved={() => { setOpen(false); qc.invalidateQueries({ queryKey: ["journals", activeUnit] }); }} />
+            <NewTransactionDialog
+              unitId={activeUnit!}
+              onSaved={() => {
+                setOpen(false);
+                qc.invalidateQueries({ queryKey: ["journals", activeUnit] });
+              }}
+            />
           </Dialog>
         </div>
       </div>
@@ -91,7 +99,7 @@ function JurnalPage() {
             {!activeUnit && <tr><td colSpan={4} className="px-4 py-10 text-center text-muted-foreground">Pilih unit terlebih dahulu.</td></tr>}
             {activeUnit && isLoading && <tr><td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">Memuat…</td></tr>}
             {activeUnit && !isLoading && (journals?.length ?? 0) === 0 && (
-              <tr><td colSpan={4} className="px-4 py-12 text-center text-muted-foreground">Belum ada jurnal. Klik "Jurnal Baru".</td></tr>
+              <tr><td colSpan={4} className="px-4 py-12 text-center text-muted-foreground">Belum ada transaksi. Klik "Transaksi Baru".</td></tr>
             )}
             {(journals ?? []).map((j: any) => {
               const total = (j.journal_items ?? []).reduce((s: number, it: any) => s + Number(it.debit), 0);
@@ -111,122 +119,189 @@ function JurnalPage() {
   );
 }
 
-function NewJournalDialog({ unitId, onSaved }: { unitId: string; onSaved: () => void }) {
+/**
+ * Form transaksi sederhana untuk user awam akuntansi.
+ *
+ * - Jenis "Penerimaan" → Akun Kas/Bank di-DEBIT, Akun Sumber (pendapatan/dll) di-KREDIT.
+ * - Jenis "Pengeluaran" → Akun Kas/Bank di-KREDIT, Akun Tujuan (beban/dll) di-DEBIT.
+ *
+ * Sistem yang menentukan sisi debit/kredit berdasar jenis transaksi & tipe akun
+ * (normal balance). Jika user "terbalik", sistem tetap menempatkan ke sisi yang benar.
+ */
+function NewTransactionDialog({ unitId, onSaved }: { unitId: string; onSaved: () => void }) {
   const { data: coa } = useQuery({
     queryKey: ["coa", unitId],
-    queryFn: async () => (await supabase.from("chart_of_accounts").select("id, kode, nama, tipe").eq("unit_id", unitId).order("kode")).data ?? [],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("chart_of_accounts")
+        .select("id, kode, nama, tipe")
+        .eq("unit_id", unitId)
+        .order("kode");
+      return (data ?? []) as Akun[];
+    },
   });
+
+  const [jenis, setJenis] = useState<"PENERIMAAN" | "PENGELUARAN">("PENERIMAAN");
   const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10));
+  const [akunKasId, setAkunKasId] = useState("");
+  const [akunLawanId, setAkunLawanId] = useState("");
+  const [jumlah, setJumlah] = useState("");
   const [deskripsi, setDeskripsi] = useState("");
-  const [lines, setLines] = useState<Array<{ account_id: string; debit: string; kredit: string; deskripsi: string }>>(
-    [{ account_id: "", debit: "", kredit: "", deskripsi: "" }, { account_id: "", debit: "", kredit: "", deskripsi: "" }]
-  );
   const [busy, setBusy] = useState(false);
 
-  const totals = useMemo(() => {
-    const td = lines.reduce((s, l) => s + (Number(l.debit) || 0), 0);
-    const tk = lines.reduce((s, l) => s + (Number(l.kredit) || 0), 0);
-    return { td, tk, seimbang: td > 0 && td === tk };
-  }, [lines]);
+  // Filter akun kas/bank: tipe ASET (utamakan yang namanya mengandung "kas" / "bank")
+  const akunKas = useMemo(() => {
+    const aset = (coa ?? []).filter((a) => a.tipe === "ASET");
+    const kasBank = aset.filter((a) => /kas|bank/i.test(a.nama));
+    return kasBank.length > 0 ? kasBank : aset;
+  }, [coa]);
+
+  // Akun lawan tergantung jenis transaksi:
+  // - Penerimaan: sumber uang masuk → Pendapatan, Kewajiban (utang baru), Ekuitas (setoran modal), Aset non-kas (piutang masuk)
+  // - Pengeluaran: tujuan uang keluar → Beban, HPP, Aset non-kas (beli aset/persediaan), Kewajiban (bayar utang)
+  const akunLawan = useMemo(() => {
+    const all = (coa ?? []).filter((a) => a.id !== akunKasId);
+    if (jenis === "PENERIMAAN") {
+      return all.filter((a) => ["PENDAPATAN", "KEWAJIBAN", "EKUITAS", "ASET"].includes(a.tipe));
+    }
+    return all.filter((a) => ["BEBAN", "HPP", "ASET", "KEWAJIBAN"].includes(a.tipe));
+  }, [coa, akunKasId, jenis]);
+
+  const groupedLawan = useMemo(() => {
+    const groups: Record<string, Akun[]> = {};
+    for (const a of akunLawan) (groups[a.tipe] ||= []).push(a);
+    return groups;
+  }, [akunLawan]);
+
+  const tipeLabel: Record<string, string> = {
+    PENDAPATAN: "Pendapatan",
+    BEBAN: "Beban",
+    HPP: "Harga Pokok Penjualan",
+    ASET: "Aset / Persediaan",
+    KEWAJIBAN: "Utang / Kewajiban",
+    EKUITAS: "Modal / Ekuitas",
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!totals.seimbang) { toast.error("Debit dan Kredit harus seimbang."); return; }
+    const nominal = Number(jumlah);
+    if (!akunKasId || !akunLawanId) {
+      toast.error("Pilih akun kas dan akun lawan.");
+      return;
+    }
+    if (!(nominal > 0)) {
+      toast.error("Jumlah harus lebih dari 0.");
+      return;
+    }
     setBusy(true);
     try {
-      const nomor = `JU-${Date.now()}`;
-      const { data: jrn, error } = await supabase.from("journals")
-        .insert({ unit_id: unitId, tanggal, nomor, deskripsi }).select().single();
+      const nomor = `TR-${Date.now()}`;
+      const { data: jrn, error } = await supabase
+        .from("journals")
+        .insert({ unit_id: unitId, tanggal, nomor, deskripsi: deskripsi || (jenis === "PENERIMAAN" ? "Penerimaan kas" : "Pengeluaran kas") })
+        .select()
+        .single();
       if (error || !jrn) throw error ?? new Error("Gagal");
-      const items = lines.filter((l) => l.account_id && (Number(l.debit) > 0 || Number(l.kredit) > 0))
-        .map((l) => ({
-          journal_id: jrn.id,
-          account_id: l.account_id,
-          unit_id: unitId,
-          debit: Number(l.debit) || 0,
-          kredit: Number(l.kredit) || 0,
-          deskripsi: l.deskripsi || null,
-        }));
+
+      // Sistem yang menentukan sisi debit/kredit
+      const items =
+        jenis === "PENERIMAAN"
+          ? [
+              { journal_id: jrn.id, account_id: akunKasId, unit_id: unitId, debit: nominal, kredit: 0, deskripsi: null },
+              { journal_id: jrn.id, account_id: akunLawanId, unit_id: unitId, debit: 0, kredit: nominal, deskripsi: null },
+            ]
+          : [
+              { journal_id: jrn.id, account_id: akunLawanId, unit_id: unitId, debit: nominal, kredit: 0, deskripsi: null },
+              { journal_id: jrn.id, account_id: akunKasId, unit_id: unitId, debit: 0, kredit: nominal, deskripsi: null },
+            ];
+
       const { error: e2 } = await supabase.from("journal_items").insert(items);
       if (e2) throw e2;
-      toast.success("Jurnal tersimpan");
+      toast.success("Transaksi tersimpan");
       onSaved();
     } catch (err: any) {
       toast.error(err?.message ?? "Gagal menyimpan");
-    } finally { setBusy(false); }
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
-    <DialogContent className="max-w-3xl">
-      <DialogHeader><DialogTitle>Jurnal Baru</DialogTitle></DialogHeader>
+    <DialogContent className="max-w-xl">
+      <DialogHeader>
+        <DialogTitle>Catat Transaksi Baru</DialogTitle>
+        <DialogDescription>
+          Pilih apakah uang <strong>masuk</strong> atau <strong>keluar</strong>, lalu pilih asal/tujuan dananya. Sistem mengurus pencatatan akuntansinya.
+        </DialogDescription>
+      </DialogHeader>
+
       <form onSubmit={submit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => { setJenis("PENERIMAAN"); setAkunLawanId(""); }}
+            className={`flex items-center gap-2 rounded-md border-2 px-3 py-3 text-sm font-medium transition ${jenis === "PENERIMAAN" ? "border-success bg-success/10 text-success" : "border-border hover:bg-muted/50"}`}
+          >
+            <ArrowDownToLine className="h-4 w-4" /> Uang Masuk
+          </button>
+          <button
+            type="button"
+            onClick={() => { setJenis("PENGELUARAN"); setAkunLawanId(""); }}
+            className={`flex items-center gap-2 rounded-md border-2 px-3 py-3 text-sm font-medium transition ${jenis === "PENGELUARAN" ? "border-destructive bg-destructive/10 text-destructive" : "border-border hover:bg-muted/50"}`}
+          >
+            <ArrowUpFromLine className="h-4 w-4" /> Uang Keluar
+          </button>
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
             <Label>Tanggal</Label>
             <Input type="date" required value={tanggal} onChange={(e) => setTanggal(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>Deskripsi</Label>
-            <Input value={deskripsi} onChange={(e) => setDeskripsi(e.target.value)} placeholder="Penerimaan kas penjualan…" />
+            <Label>Jumlah (Rp)</Label>
+            <Input type="number" min="0" step="1" required value={jumlah} onChange={(e) => setJumlah(e.target.value)} placeholder="0" />
           </div>
         </div>
-        <div className="rounded-md border overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-secondary">
-              <tr className="text-left">
-                <th className="px-2 py-2 font-medium">Akun</th>
-                <th className="px-2 py-2 font-medium text-right">Debit</th>
-                <th className="px-2 py-2 font-medium text-right">Kredit</th>
-                <th className="w-8"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {lines.map((l, i) => (
-                <tr key={i}>
-                  <td className="px-1 py-1">
-                    <Select value={l.account_id} onValueChange={(v) => setLines(lines.map((x, j) => j === i ? { ...x, account_id: v } : x))}>
-                      <SelectTrigger className="h-9"><SelectValue placeholder="Pilih akun" /></SelectTrigger>
-                      <SelectContent>
-                        {(coa ?? []).map((a: any) => <SelectItem key={a.id} value={a.id}>{a.kode} — {a.nama}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </td>
-                  <td className="px-1 py-1">
-                    <Input type="number" min="0" step="0.01" className="text-right" value={l.debit}
-                      onChange={(e) => setLines(lines.map((x, j) => j === i ? { ...x, debit: e.target.value, kredit: e.target.value ? "" : x.kredit } : x))} />
-                  </td>
-                  <td className="px-1 py-1">
-                    <Input type="number" min="0" step="0.01" className="text-right" value={l.kredit}
-                      onChange={(e) => setLines(lines.map((x, j) => j === i ? { ...x, kredit: e.target.value, debit: e.target.value ? "" : x.debit } : x))} />
-                  </td>
-                  <td className="px-1 py-1">
-                    <Button type="button" variant="ghost" size="sm" onClick={() => setLines(lines.filter((_, j) => j !== i))}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </td>
-                </tr>
+
+        <div className="space-y-2">
+          <Label>{jenis === "PENERIMAAN" ? "Disimpan ke (Kas / Bank)" : "Dibayar dari (Kas / Bank)"}</Label>
+          <Select value={akunKasId} onValueChange={setAkunKasId}>
+            <SelectTrigger><SelectValue placeholder="Pilih akun kas / bank" /></SelectTrigger>
+            <SelectContent>
+              {akunKas.map((a) => (
+                <SelectItem key={a.id} value={a.id}>{a.kode} — {a.nama}</SelectItem>
               ))}
-            </tbody>
-            <tfoot className="bg-muted/30 font-medium">
-              <tr>
-                <td className="px-2 py-2 text-right">Total</td>
-                <td className="px-2 py-2 text-right">{formatIDR(totals.td)}</td>
-                <td className="px-2 py-2 text-right">{formatIDR(totals.tk)}</td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
+            </SelectContent>
+          </Select>
         </div>
-        <div className="flex items-center justify-between">
-          <Button type="button" variant="outline" size="sm" onClick={() => setLines([...lines, { account_id: "", debit: "", kredit: "", deskripsi: "" }])}>
-            <Plus className="h-4 w-4 mr-1" /> Tambah Baris
-          </Button>
-          <div className={`text-sm font-medium ${totals.seimbang ? "text-success" : "text-destructive"}`}>
-            {totals.seimbang ? "✓ Seimbang" : "Belum seimbang"}
-          </div>
+
+        <div className="space-y-2">
+          <Label>{jenis === "PENERIMAAN" ? "Sumber Penerimaan" : "Tujuan Pengeluaran"}</Label>
+          <Select value={akunLawanId} onValueChange={setAkunLawanId}>
+            <SelectTrigger>
+              <SelectValue placeholder={jenis === "PENERIMAAN" ? "Cth: Pendapatan Penjualan" : "Cth: Beban Operasional"} />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(groupedLawan).map(([tipe, list]) => (
+                <div key={tipe}>
+                  <div className="px-2 py-1 text-[11px] uppercase tracking-wide text-muted-foreground font-medium">{tipeLabel[tipe] ?? tipe}</div>
+                  {list.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>{a.kode} — {a.nama}</SelectItem>
+                  ))}
+                </div>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+
+        <div className="space-y-2">
+          <Label>Keterangan (opsional)</Label>
+          <Input value={deskripsi} onChange={(e) => setDeskripsi(e.target.value)} placeholder="cth: Penjualan tunai hari ini" />
+        </div>
+
         <DialogFooter>
-          <Button type="submit" disabled={busy || !totals.seimbang}>{busy ? "Menyimpan…" : "Simpan Jurnal"}</Button>
+          <Button type="submit" disabled={busy}>{busy ? "Menyimpan…" : "Simpan Transaksi"}</Button>
         </DialogFooter>
       </form>
     </DialogContent>
