@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/laporan/konsolidasi")({
   head: () => ({ meta: [{ title: "Konsolidasi BUMDes — ERP BUMDes" }] }),
-  component: () => <Protected requireSuper><KonsolidasiPage /></Protected>,
+  component: () => <Protected require="tenant_admin"><KonsolidasiPage /></Protected>,
 });
 
 function KonsolidasiPage() {
