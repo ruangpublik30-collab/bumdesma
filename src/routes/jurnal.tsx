@@ -15,13 +15,13 @@ import { formatIDR, formatDate } from "@/lib/format";
 
 export const Route = createFileRoute("/jurnal")({
   head: () => ({ meta: [{ title: "Transaksi — ERP BUMDes" }] }),
-  component: () => <Protected><JurnalPage /></Protected>,
+  component: () => <Protected require="tenant"><JurnalPage /></Protected>,
 });
 
 type Akun = { id: string; kode: string; nama: string; tipe: string };
 
 function JurnalPage() {
-  const { isSuperAdmin, unitId } = useAuth();
+  const { isTenantAdmin, unitId } = useAuth();
   const qc = useQueryClient();
 
   const { data: units } = useQuery({
@@ -30,7 +30,7 @@ function JurnalPage() {
   });
 
   const [selectedUnit, setSelectedUnit] = useState<string | null>(unitId);
-  const activeUnit = isSuperAdmin ? selectedUnit : unitId;
+  const activeUnit = isTenantAdmin ? selectedUnit : unitId;
 
   const { data: journals, isLoading } = useQuery({
     queryKey: ["journals", activeUnit],
@@ -53,11 +53,11 @@ function JurnalPage() {
         <div>
           <h2 className="font-display text-2xl font-bold">Catat Transaksi</h2>
           <p className="text-sm text-muted-foreground">
-            Catat pemasukan & pengeluaran kas. Sistem otomatis menyusun jurnal double-entry — Anda tidak perlu tahu debit/kredit.
+            Catat pemasukan & pengeluaran kas. Sistem otomatis menyusun jurnal akuntansi — Anda tidak perlu tahu debit/kredit.
           </p>
         </div>
         <div className="flex items-end gap-3">
-          {isSuperAdmin && (
+          {isTenantAdmin && (
             <div className="space-y-1.5">
               <Label className="text-xs">Unit</Label>
               <Select value={selectedUnit ?? ""} onValueChange={(v) => setSelectedUnit(v)}>
@@ -74,13 +74,15 @@ function JurnalPage() {
             <DialogTrigger asChild>
               <Button disabled={!activeUnit}><Plus className="h-4 w-4 mr-1" /> Transaksi Baru</Button>
             </DialogTrigger>
-            <NewTransactionDialog
-              unitId={activeUnit!}
-              onSaved={() => {
-                setOpen(false);
-                qc.invalidateQueries({ queryKey: ["journals", activeUnit] });
-              }}
-            />
+            {activeUnit && (
+              <NewTransactionDialog
+                unitId={activeUnit}
+                onSaved={() => {
+                  setOpen(false);
+                  qc.invalidateQueries({ queryKey: ["journals", activeUnit] });
+                }}
+              />
+            )}
           </Dialog>
         </div>
       </div>
@@ -119,15 +121,6 @@ function JurnalPage() {
   );
 }
 
-/**
- * Form transaksi sederhana untuk user awam akuntansi.
- *
- * - Jenis "Penerimaan" → Akun Kas/Bank di-DEBIT, Akun Sumber (pendapatan/dll) di-KREDIT.
- * - Jenis "Pengeluaran" → Akun Kas/Bank di-KREDIT, Akun Tujuan (beban/dll) di-DEBIT.
- *
- * Sistem yang menentukan sisi debit/kredit berdasar jenis transaksi & tipe akun
- * (normal balance). Jika user "terbalik", sistem tetap menempatkan ke sisi yang benar.
- */
 function NewTransactionDialog({ unitId, onSaved }: { unitId: string; onSaved: () => void }) {
   const { data: coa } = useQuery({
     queryKey: ["coa", unitId],
@@ -149,22 +142,18 @@ function NewTransactionDialog({ unitId, onSaved }: { unitId: string; onSaved: ()
   const [deskripsi, setDeskripsi] = useState("");
   const [busy, setBusy] = useState(false);
 
-  // Filter akun kas/bank: tipe ASET (utamakan yang namanya mengandung "kas" / "bank")
   const akunKas = useMemo(() => {
-    const aset = (coa ?? []).filter((a) => a.tipe === "ASET");
-    const kasBank = aset.filter((a) => /kas|bank/i.test(a.nama));
+    const aset = (coa ?? []).filter((a) => a.tipe === "aset");
+    const kasBank = aset.filter((a) => /kas|bank/i.test(a.nama) || a.kode.startsWith("1-1"));
     return kasBank.length > 0 ? kasBank : aset;
   }, [coa]);
 
-  // Akun lawan tergantung jenis transaksi:
-  // - Penerimaan: sumber uang masuk → Pendapatan, Kewajiban (utang baru), Ekuitas (setoran modal), Aset non-kas (piutang masuk)
-  // - Pengeluaran: tujuan uang keluar → Beban, HPP, Aset non-kas (beli aset/persediaan), Kewajiban (bayar utang)
   const akunLawan = useMemo(() => {
     const all = (coa ?? []).filter((a) => a.id !== akunKasId);
     if (jenis === "PENERIMAAN") {
-      return all.filter((a) => ["PENDAPATAN", "KEWAJIBAN", "EKUITAS", "ASET"].includes(a.tipe));
+      return all.filter((a) => ["pendapatan", "kewajiban", "ekuitas", "aset"].includes(a.tipe));
     }
-    return all.filter((a) => ["BEBAN", "HPP", "ASET", "KEWAJIBAN"].includes(a.tipe));
+    return all.filter((a) => ["beban", "aset", "kewajiban"].includes(a.tipe));
   }, [coa, akunKasId, jenis]);
 
   const groupedLawan = useMemo(() => {
@@ -174,25 +163,18 @@ function NewTransactionDialog({ unitId, onSaved }: { unitId: string; onSaved: ()
   }, [akunLawan]);
 
   const tipeLabel: Record<string, string> = {
-    PENDAPATAN: "Pendapatan",
-    BEBAN: "Beban",
-    HPP: "Harga Pokok Penjualan",
-    ASET: "Aset / Persediaan",
-    KEWAJIBAN: "Utang / Kewajiban",
-    EKUITAS: "Modal / Ekuitas",
+    pendapatan: "Pendapatan",
+    beban: "Beban / HPP",
+    aset: "Aset / Persediaan",
+    kewajiban: "Utang / Kewajiban",
+    ekuitas: "Modal / Ekuitas",
   };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const nominal = Number(jumlah);
-    if (!akunKasId || !akunLawanId) {
-      toast.error("Pilih akun kas dan akun lawan.");
-      return;
-    }
-    if (!(nominal > 0)) {
-      toast.error("Jumlah harus lebih dari 0.");
-      return;
-    }
+    if (!akunKasId || !akunLawanId) { toast.error("Pilih akun kas dan akun lawan."); return; }
+    if (!(nominal > 0)) { toast.error("Jumlah harus lebih dari 0."); return; }
     setBusy(true);
     try {
       const nomor = `TR-${Date.now()}`;
@@ -203,7 +185,6 @@ function NewTransactionDialog({ unitId, onSaved }: { unitId: string; onSaved: ()
         .single();
       if (error || !jrn) throw error ?? new Error("Gagal");
 
-      // Sistem yang menentukan sisi debit/kredit
       const items =
         jenis === "PENERIMAAN"
           ? [

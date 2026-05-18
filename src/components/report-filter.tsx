@@ -20,10 +20,12 @@ export function ReportFilter({
   showConsolidate?: boolean;
   showDateRange?: boolean;
 }) {
-  const { isSuperAdmin } = useAuth();
+  const { isTenantAdmin, isPlatformAdmin } = useAuth();
+  const canPickUnit = isTenantAdmin || isPlatformAdmin;
+
   const { data: units } = useQuery({
-    queryKey: ["units"],
-    enabled: isSuperAdmin,
+    queryKey: ["units-filter"],
+    enabled: canPickUnit,
     queryFn: async () => (await supabase.from("business_units").select("id, nama_unit").order("nama_unit")).data ?? [],
   });
 
@@ -31,11 +33,11 @@ export function ReportFilter({
     <div className="rounded-lg border bg-card p-4 flex flex-wrap items-end gap-3">
       <div className="space-y-1.5">
         <Label className="text-xs">Cakupan</Label>
-        {isSuperAdmin ? (
+        {canPickUnit ? (
           <Select value={value.unit_id ?? "__all__"} onValueChange={(v) => onChange({ ...value, unit_id: v === "__all__" ? null : v })}>
             <SelectTrigger className="min-w-[240px]"><SelectValue /></SelectTrigger>
             <SelectContent>
-              {showConsolidate && <SelectItem value="__all__">Konsolidasi Seluruh BUMDes</SelectItem>}
+              {showConsolidate && <SelectItem value="__all__">Konsolidasi Seluruh Unit</SelectItem>}
               {(units ?? []).map((u: any) => <SelectItem key={u.id} value={u.id}>{u.nama_unit}</SelectItem>)}
             </SelectContent>
           </Select>
@@ -60,9 +62,10 @@ export function ReportFilter({
 }
 
 export function useDefaultFilter(): ReportFilterValue {
-  const { isSuperAdmin, unitId } = useAuth();
+  const { isTenantAdmin, isPlatformAdmin, unitId } = useAuth();
   const today = new Date();
   const start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
   const end = today.toISOString().slice(0, 10);
-  return { unit_id: isSuperAdmin ? null : unitId, start_date: start, end_date: end };
+  const canPick = isTenantAdmin || isPlatformAdmin;
+  return { unit_id: canPick ? null : unitId, start_date: start, end_date: end };
 }

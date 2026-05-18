@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Protected } from "@/components/protected";
+import { useAuth } from "@/lib/auth-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { createBusinessUnit } from "@/lib/units.functions";
@@ -15,14 +16,15 @@ import { Plus, Building2 } from "lucide-react";
 import { formatDate } from "@/lib/format";
 
 export const Route = createFileRoute("/units")({
-  head: () => ({ meta: [{ title: "Manajemen Unit — ERP BUMDes" }] }),
-  component: () => <Protected requireSuper><UnitsPage /></Protected>,
+  head: () => ({ meta: [{ title: "Unit Usaha — ERP BUMDes" }] }),
+  component: () => <Protected require="tenant_admin"><UnitsPage /></Protected>,
 });
 
 const CUSTOM = "__custom__";
 
 function UnitsPage() {
   const qc = useQueryClient();
+  const { tenantId, currentTenant } = useAuth();
   const create = useServerFn(createBusinessUnit);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -31,7 +33,7 @@ function UnitsPage() {
     queryKey: ["unit-templates"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("unit_templates" as never)
+        .from("unit_templates")
         .select("id, nama_template, kode_template, deskripsi, is_default")
         .order("nama_template");
       if (error) throw error;
@@ -44,11 +46,8 @@ function UnitsPage() {
     kode_unit: "",
     template_choice: CUSTOM as string,
     jenis_unit_custom: "",
-    email_admin: "",
-    password: "",
   });
 
-  // Default ke template "default" jika tersedia (pertama kali templates termuat)
   useEffect(() => {
     if (templates && templates.length > 0 && form.template_choice === CUSTOM) {
       const def = templates.find((t) => t.is_default) ?? templates[0];
@@ -58,11 +57,13 @@ function UnitsPage() {
   }, [templates]);
 
   const { data: units, isLoading } = useQuery({
-    queryKey: ["units"],
+    queryKey: ["units", tenantId],
+    enabled: !!tenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("business_units")
         .select("*")
+        .eq("tenant_id", tenantId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -71,6 +72,7 @@ function UnitsPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!tenantId) { toast.error("BUMDes belum terdeteksi pada sesi Anda."); return; }
     setBusy(true);
     try {
       const isCustom = form.template_choice === CUSTOM;
@@ -83,26 +85,19 @@ function UnitsPage() {
       }
       await create({
         data: {
+          tenant_id: tenantId,
           nama_unit: form.nama_unit,
           kode_unit: form.kode_unit,
           jenis_unit: jenis,
           template_id: isCustom ? null : form.template_choice,
-          email_admin: form.email_admin,
-          password: form.password,
         },
       });
-      toast.success(`Unit "${form.nama_unit}" berhasil dibuat. COA & login admin disiapkan otomatis.`);
+      toast.success(`Unit "${form.nama_unit}" berhasil dibuat. Bagan akun disiapkan otomatis.`);
       setOpen(false);
       const def = templates?.find((t) => t.is_default) ?? templates?.[0];
-      setForm({
-        nama_unit: "",
-        kode_unit: "",
-        template_choice: def?.id ?? CUSTOM,
-        jenis_unit_custom: "",
-        email_admin: "",
-        password: "",
-      });
+      setForm({ nama_unit: "", kode_unit: "", template_choice: def?.id ?? CUSTOM, jenis_unit_custom: "" });
       qc.invalidateQueries({ queryKey: ["units"] });
+      qc.invalidateQueries({ queryKey: ["units-filter"] });
       qc.invalidateQueries({ queryKey: ["units-summary"] });
     } catch (err: any) {
       toast.error(err?.message ?? "Gagal membuat unit");
@@ -114,15 +109,15 @@ function UnitsPage() {
   const selectedTplDesc =
     form.template_choice !== CUSTOM
       ? templates?.find((t) => t.id === form.template_choice)?.deskripsi
-      : "Sistem hanya menyiapkan bagan akun universal. Admin dapat menambah akun sendiri nanti.";
+      : "Hanya menyiapkan bagan akun universal. Akun spesifik dapat ditambah kemudian.";
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between">
+      <div className="flex items-end justify-between flex-wrap gap-3">
         <div>
-          <h2 className="font-display text-2xl font-bold">Manajemen Unit Usaha</h2>
+          <h2 className="font-display text-2xl font-bold">Unit Usaha {currentTenant?.nama_bumdes ?? ""}</h2>
           <p className="text-sm text-muted-foreground">
-            Tambah unit baru — sistem otomatis menyiapkan bagan akun, login admin, dan modul laporan.
+            Tambah unit usaha baru — sistem otomatis menyiapkan bagan akun keuangannya.
           </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -144,7 +139,7 @@ function UnitsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Template Unit (opsional)</Label>
+                <Label>Template Unit</Label>
                 <Select value={form.template_choice} onValueChange={(v) => setForm({ ...form, template_choice: v })}>
                   <SelectTrigger><SelectValue placeholder="Pilih template…" /></SelectTrigger>
                   <SelectContent>
@@ -171,15 +166,6 @@ function UnitsPage() {
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Label>Email Admin Unit</Label>
-                <Input type="email" required value={form.email_admin} onChange={(e) => setForm({ ...form, email_admin: e.target.value })} placeholder="admin.dagang@bumdes.id" />
-              </div>
-              <div className="space-y-2">
-                <Label>Kata Sandi Awal</Label>
-                <Input type="password" required minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-                <p className="text-xs text-muted-foreground">Minimal 8 karakter. Sampaikan ke admin unit secara aman.</p>
-              </div>
               <DialogFooter>
                 <Button type="submit" disabled={busy}>{busy ? "Memproses…" : "Buat Unit"}</Button>
               </DialogFooter>

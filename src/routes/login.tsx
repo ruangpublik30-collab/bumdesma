@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { useServerFn } from "@tanstack/react-start";
-import { bootstrapSuperAdmin } from "@/lib/units.functions";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Masuk — ERP BUMDes" }] }),
@@ -15,15 +13,16 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { user, loading, refreshRoles } = useAuth();
+  const { user, loading, isPlatformAdmin, refreshRoles } = useAuth();
   const nav = useNavigate();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const bootstrap = useServerFn(bootstrapSuperAdmin);
 
-  useEffect(() => { if (!loading && user) nav({ to: "/dashboard" }); }, [user, loading, nav]);
+  useEffect(() => {
+    if (!loading && user) nav({ to: isPlatformAdmin ? "/platform/pendaftaran" : "/dashboard" });
+  }, [user, loading, isPlatformAdmin, nav]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,24 +31,16 @@ function LoginPage() {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast.success("Berhasil masuk");
         await refreshRoles();
-        nav({ to: "/dashboard" });
+        toast.success("Berhasil masuk");
       } else {
         const { error } = await supabase.auth.signUp({
           email, password,
-          options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+          options: { emailRedirectTo: `${window.location.origin}/` },
         });
         if (error) throw error;
-        // Coba bootstrap super admin pertama
-        try {
-          await bootstrap({ data: { email } });
-          toast.success("Akun Super Admin BUMDes berhasil dibuat.");
-        } catch {
-          toast.success("Akun terdaftar. Hubungi Super Admin untuk diberi peran unit.");
-        }
+        toast.success("Akun berhasil dibuat. Jika ini akun pertama, Anda otomatis menjadi Super Admin Platform.");
         await refreshRoles();
-        nav({ to: "/dashboard" });
       }
     } catch (err: any) {
       toast.error(err?.message ?? "Gagal");
@@ -65,11 +56,14 @@ function LoginPage() {
         </Link>
         <div>
           <h2 className="font-display text-3xl font-bold leading-tight">
-            Akuntansi terintegrasi<br />untuk seluruh unit usaha desa.
+            Platform akuntansi multi-tenant<br />untuk BUMDes seluruh Indonesia.
           </h2>
           <p className="mt-3 text-sm opacity-80 max-w-md">
-            Satu platform untuk mengelola seluruh unit usaha BUMDes — dari pencatatan jurnal harian hingga laporan keuangan konsolidasi.
+            Direktur BUMDes mendapat akses setelah pendaftaran disetujui oleh tim platform.
           </p>
+          <Link to="/daftar" className="mt-6 inline-flex items-center text-sm font-medium underline">
+            Belum punya akses? Daftarkan BUMDes →
+          </Link>
         </div>
         <div className="text-xs opacity-70">Sistem akuntansi multi-unit usaha desa</div>
       </div>
@@ -77,9 +71,13 @@ function LoginPage() {
       <div className="flex items-center justify-center p-8">
         <form onSubmit={submit} className="w-full max-w-sm space-y-5">
           <div>
-            <h1 className="font-display text-2xl font-semibold">{mode === "login" ? "Masuk ke Sistem" : "Daftar Akun Baru"}</h1>
+            <h1 className="font-display text-2xl font-semibold">
+              {mode === "login" ? "Masuk ke Sistem" : "Daftar Akun (Super Admin Platform)"}
+            </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {mode === "login" ? "Gunakan email & kata sandi unit / pusat Anda." : "Akun pertama yang terdaftar otomatis menjadi Super Admin BUMDes."}
+              {mode === "login"
+                ? "Gunakan email & kata sandi yang telah diterbitkan platform."
+                : "Akun pertama yang mendaftar di sini otomatis menjadi Super Admin Platform. Pendaftaran BUMDes biasa dilakukan di halaman publik."}
             </p>
           </div>
           <div className="space-y-2">
@@ -94,8 +92,11 @@ function LoginPage() {
             {busy ? "Memproses…" : mode === "login" ? "Masuk" : "Daftar"}
           </Button>
           <button type="button" onClick={() => setMode(mode === "login" ? "register" : "login")} className="text-sm text-primary hover:underline w-full text-center">
-            {mode === "login" ? "Belum punya akun? Daftar Super Admin BUMDes" : "Sudah punya akun? Masuk"}
+            {mode === "login" ? "Bootstrap akun Super Admin Platform" : "Sudah punya akun? Masuk"}
           </button>
+          <div className="text-center text-xs text-muted-foreground border-t pt-4">
+            BUMDes baru mendaftar di <Link to="/daftar" className="text-primary hover:underline">/daftar</Link>
+          </div>
         </form>
       </div>
     </div>

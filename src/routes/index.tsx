@@ -7,17 +7,21 @@ import { Building2, BookOpen, FileBarChart, ShieldCheck } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ERP BUMDes — Akuntansi Multi-Unit untuk Desa" },
-      { name: "description", content: "Platform ERP BUMDes berbasis multi-unit usaha dengan akuntansi double-entry, laporan keuangan per unit, dan konsolidasi." },
+      { title: "ERP BUMDes — Platform Akuntansi Multi-Unit untuk Desa" },
+      { name: "description", content: "Platform ERP BUMDes multi-tenant: pendaftaran BUMDes online, akuntansi multi-unit, laporan keuangan per unit dan konsolidasi." },
     ],
   }),
   component: Landing,
 });
 
 function Landing() {
-  const { user, loading } = useAuth();
+  const { user, loading, isPlatformAdmin } = useAuth();
   const nav = useNavigate();
-  useEffect(() => { if (!loading && user) nav({ to: "/dashboard" }); }, [user, loading, nav]);
+  useEffect(() => {
+    if (!loading && user) {
+      nav({ to: isPlatformAdmin ? "/platform/pendaftaran" : "/dashboard" });
+    }
+  }, [user, loading, isPlatformAdmin, nav]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -27,10 +31,13 @@ function Landing() {
             <div className="h-9 w-9 rounded bg-primary text-primary-foreground grid place-items-center font-bold">B</div>
             <div>
               <div className="font-display font-semibold">ERP BUMDes</div>
-              <div className="text-xs text-muted-foreground">Sistem Multi-Unit</div>
+              <div className="text-xs text-muted-foreground">Platform Multi-Tenant</div>
             </div>
           </div>
-          <Button asChild><Link to="/login">Masuk</Link></Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline"><Link to="/login">Masuk</Link></Button>
+            <Button asChild><Link to="/daftar">Daftarkan BUMDes</Link></Button>
+          </div>
         </div>
       </header>
 
@@ -41,21 +48,22 @@ function Landing() {
             Platform Resmi Akuntansi BUMDes
           </div>
           <h1 className="mt-5 font-display text-5xl font-bold leading-tight text-foreground">
-            ERP terpadu untuk <span className="text-primary">BUMDes multi-unit</span> usaha.
+            Platform akuntansi untuk <span className="text-primary">BUMDes seluruh Indonesia</span>.
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Kelola unit dagang, simpan pinjam, ketahanan pangan, jasa, air bersih, hingga wisata dalam satu sistem.
-            Tambah unit baru cukup satu klik — akun, dashboard, dan laporan keuangan dibuat otomatis.
+            Daftarkan BUMDes Anda — setelah disetujui oleh admin platform, BUMDes Anda mendapat workspace tersendiri:
+            login direktur, manajemen unit usaha, pencatatan transaksi, dan laporan keuangan multi-unit beserta konsolidasi.
           </p>
           <div className="mt-6 flex gap-3">
-            <Button asChild size="lg"><Link to="/login">Mulai Sekarang</Link></Button>
+            <Button asChild size="lg"><Link to="/daftar">Daftarkan BUMDes</Link></Button>
+            <Button asChild size="lg" variant="outline"><Link to="/login">Sudah punya akun? Masuk</Link></Button>
           </div>
         </div>
 
         <div className="mt-20 grid md:grid-cols-3 gap-6">
           {[
-            { icon: Building2, title: "Multi-Tenant Unit Usaha", desc: "Setiap unit punya login, dashboard, transaksi, dan laporan keuangan sendiri." },
-            { icon: BookOpen, title: "Akuntansi Double-Entry", desc: "Jurnal terintegrasi dengan bagan akun template per jenis unit usaha." },
+            { icon: Building2, title: "Multi-Unit Usaha", desc: "Tambah unit dagang, simpan pinjam, budidaya, jasa, air bersih — semua dalam satu BUMDes." },
+            { icon: BookOpen, title: "Transaksi Sederhana", desc: "Catat uang masuk & keluar — sistem otomatis menyusun jurnal akuntansi double-entry." },
             { icon: FileBarChart, title: "Laporan + Konsolidasi", desc: "Laba Rugi, Neraca, Arus Kas per unit serta konsolidasi seluruh BUMDes." },
           ].map((f) => (
             <div key={f.title} className="rounded-lg border bg-card p-6">
@@ -70,7 +78,7 @@ function Landing() {
       <footer className="border-t mt-20">
         <div className="max-w-6xl mx-auto px-6 py-6 text-xs text-muted-foreground flex justify-between">
           <span>© {new Date().getFullYear()} ERP BUMDes</span>
-          <span>Sistem akuntansi multi-unit usaha desa</span>
+          <span>Platform akuntansi multi-tenant untuk BUMDes</span>
         </div>
       </footer>
     </div>

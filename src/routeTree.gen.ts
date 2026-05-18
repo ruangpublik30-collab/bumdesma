@@ -13,7 +13,10 @@ import { Route as UnitsRouteImport } from './routes/units'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as JurnalRouteImport } from './routes/jurnal'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DaftarRouteImport } from './routes/daftar'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlatformPendaftaranRouteImport } from './routes/platform.pendaftaran'
+import { Route as PlatformBumdesRouteImport } from './routes/platform.bumdes'
 import { Route as LaporanNeracaRouteImport } from './routes/laporan.neraca'
 import { Route as LaporanLabaRugiRouteImport } from './routes/laporan.laba-rugi'
 import { Route as LaporanKonsolidasiRouteImport } from './routes/laporan.konsolidasi'
@@ -39,9 +42,24 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DaftarRoute = DaftarRouteImport.update({
+  id: '/daftar',
+  path: '/daftar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformPendaftaranRoute = PlatformPendaftaranRouteImport.update({
+  id: '/platform/pendaftaran',
+  path: '/platform/pendaftaran',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformBumdesRoute = PlatformBumdesRouteImport.update({
+  id: '/platform/bumdes',
+  path: '/platform/bumdes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LaporanNeracaRoute = LaporanNeracaRouteImport.update({
@@ -67,6 +85,7 @@ const LaporanArusKasRoute = LaporanArusKasRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/daftar': typeof DaftarRoute
   '/dashboard': typeof DashboardRoute
   '/jurnal': typeof JurnalRoute
   '/login': typeof LoginRoute
@@ -75,9 +94,12 @@ export interface FileRoutesByFullPath {
   '/laporan/konsolidasi': typeof LaporanKonsolidasiRoute
   '/laporan/laba-rugi': typeof LaporanLabaRugiRoute
   '/laporan/neraca': typeof LaporanNeracaRoute
+  '/platform/bumdes': typeof PlatformBumdesRoute
+  '/platform/pendaftaran': typeof PlatformPendaftaranRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/daftar': typeof DaftarRoute
   '/dashboard': typeof DashboardRoute
   '/jurnal': typeof JurnalRoute
   '/login': typeof LoginRoute
@@ -86,10 +108,13 @@ export interface FileRoutesByTo {
   '/laporan/konsolidasi': typeof LaporanKonsolidasiRoute
   '/laporan/laba-rugi': typeof LaporanLabaRugiRoute
   '/laporan/neraca': typeof LaporanNeracaRoute
+  '/platform/bumdes': typeof PlatformBumdesRoute
+  '/platform/pendaftaran': typeof PlatformPendaftaranRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/daftar': typeof DaftarRoute
   '/dashboard': typeof DashboardRoute
   '/jurnal': typeof JurnalRoute
   '/login': typeof LoginRoute
@@ -98,11 +123,14 @@ export interface FileRoutesById {
   '/laporan/konsolidasi': typeof LaporanKonsolidasiRoute
   '/laporan/laba-rugi': typeof LaporanLabaRugiRoute
   '/laporan/neraca': typeof LaporanNeracaRoute
+  '/platform/bumdes': typeof PlatformBumdesRoute
+  '/platform/pendaftaran': typeof PlatformPendaftaranRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/daftar'
     | '/dashboard'
     | '/jurnal'
     | '/login'
@@ -111,9 +139,12 @@ export interface FileRouteTypes {
     | '/laporan/konsolidasi'
     | '/laporan/laba-rugi'
     | '/laporan/neraca'
+    | '/platform/bumdes'
+    | '/platform/pendaftaran'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/daftar'
     | '/dashboard'
     | '/jurnal'
     | '/login'
@@ -122,9 +153,12 @@ export interface FileRouteTypes {
     | '/laporan/konsolidasi'
     | '/laporan/laba-rugi'
     | '/laporan/neraca'
+    | '/platform/bumdes'
+    | '/platform/pendaftaran'
   id:
     | '__root__'
     | '/'
+    | '/daftar'
     | '/dashboard'
     | '/jurnal'
     | '/login'
@@ -133,10 +167,13 @@ export interface FileRouteTypes {
     | '/laporan/konsolidasi'
     | '/laporan/laba-rugi'
     | '/laporan/neraca'
+    | '/platform/bumdes'
+    | '/platform/pendaftaran'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DaftarRoute: typeof DaftarRoute
   DashboardRoute: typeof DashboardRoute
   JurnalRoute: typeof JurnalRoute
   LoginRoute: typeof LoginRoute
@@ -145,6 +182,8 @@ export interface RootRouteChildren {
   LaporanKonsolidasiRoute: typeof LaporanKonsolidasiRoute
   LaporanLabaRugiRoute: typeof LaporanLabaRugiRoute
   LaporanNeracaRoute: typeof LaporanNeracaRoute
+  PlatformBumdesRoute: typeof PlatformBumdesRoute
+  PlatformPendaftaranRoute: typeof PlatformPendaftaranRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -177,11 +216,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/daftar': {
+      id: '/daftar'
+      path: '/daftar'
+      fullPath: '/daftar'
+      preLoaderRoute: typeof DaftarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/pendaftaran': {
+      id: '/platform/pendaftaran'
+      path: '/platform/pendaftaran'
+      fullPath: '/platform/pendaftaran'
+      preLoaderRoute: typeof PlatformPendaftaranRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/bumdes': {
+      id: '/platform/bumdes'
+      path: '/platform/bumdes'
+      fullPath: '/platform/bumdes'
+      preLoaderRoute: typeof PlatformBumdesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/laporan/neraca': {
@@ -217,6 +277,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DaftarRoute: DaftarRoute,
   DashboardRoute: DashboardRoute,
   JurnalRoute: JurnalRoute,
   LoginRoute: LoginRoute,
@@ -225,7 +286,19 @@ const rootRouteChildren: RootRouteChildren = {
   LaporanKonsolidasiRoute: LaporanKonsolidasiRoute,
   LaporanLabaRugiRoute: LaporanLabaRugiRoute,
   LaporanNeracaRoute: LaporanNeracaRoute,
+  PlatformBumdesRoute: PlatformBumdesRoute,
+  PlatformPendaftaranRoute: PlatformPendaftaranRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
