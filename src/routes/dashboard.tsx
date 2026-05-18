@@ -10,7 +10,7 @@ import { Building2, TrendingUp, Wallet, Coins } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — ERP BUMDes" }] }),
-  component: () => <Protected><DashboardPage /></Protected>,
+  component: () => <Protected require="tenant"><DashboardPage /></Protected>,
 });
 
 function StatCard({ label, value, icon: Icon, tone = "default" }: { label: string; value: string; icon: any; tone?: "default" | "accent" }) {
@@ -30,26 +30,27 @@ function StatCard({ label, value, icon: Icon, tone = "default" }: { label: strin
 }
 
 function DashboardPage() {
-  const { isSuperAdmin, unitId } = useAuth();
+  const { isTenantAdmin, unitId, currentTenant } = useAuth();
   const stats = useServerFn(getDashboardStats);
+  const scope = isTenantAdmin ? null : unitId; // tenant admin → konsolidasi tenant; manager_unit → unit sendiri
   const { data: statData } = useQuery({
-    queryKey: ["dashboard-stats", isSuperAdmin ? "konsolidasi" : unitId],
-    queryFn: () => stats({ data: { unit_id: isSuperAdmin ? null : unitId } }),
-    enabled: isSuperAdmin || !!unitId,
+    queryKey: ["dashboard-stats", scope],
+    queryFn: () => stats({ data: { unit_id: scope } }),
+    enabled: isTenantAdmin || !!unitId,
   });
 
   const { data: units } = useQuery({
     queryKey: ["units-summary"],
-    queryFn: async () => {
-      const { data } = await supabase.from("business_units").select("*").order("created_at", { ascending: false });
-      return data ?? [];
-    },
+    enabled: isTenantAdmin,
+    queryFn: async () => (await supabase.from("business_units").select("*").order("created_at", { ascending: false })).data ?? [],
   });
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold">{isSuperAdmin ? "Ringkasan BUMDes" : "Ringkasan Unit"}</h2>
+        <h2 className="font-display text-2xl font-bold">
+          {isTenantAdmin ? `Ringkasan ${currentTenant?.nama_bumdes ?? "BUMDes"}` : "Ringkasan Unit"}
+        </h2>
         <p className="text-sm text-muted-foreground">Periode bulan berjalan</p>
       </div>
 
@@ -60,10 +61,10 @@ function DashboardPage() {
         <StatCard label="Mutasi Kas" value={formatIDR(statData?.saldo_kas_mutasi ?? 0)} icon={Wallet} />
       </div>
 
-      {isSuperAdmin && (
+      {isTenantAdmin && (
         <div className="rounded-lg border bg-card">
           <div className="px-6 py-4 border-b">
-            <h3 className="font-display font-semibold">Unit Usaha BUMDes</h3>
+            <h3 className="font-display font-semibold">Unit Usaha</h3>
             <p className="text-xs text-muted-foreground">Total: {units?.length ?? 0} unit</p>
           </div>
           <div className="divide-y">
@@ -77,7 +78,7 @@ function DashboardPage() {
               </div>
             ))}
             {(!units || units.length === 0) && (
-              <div className="px-6 py-8 text-center text-sm text-muted-foreground">Belum ada unit usaha. Buat unit pertama di menu Manajemen Unit.</div>
+              <div className="px-6 py-8 text-center text-sm text-muted-foreground">Belum ada unit usaha. Buat unit pertama di menu Unit Usaha.</div>
             )}
           </div>
         </div>
