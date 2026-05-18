@@ -23,6 +23,7 @@ export type Database = {
           nama_unit: string
           status: Database["public"]["Enums"]["unit_status"]
           template_id: string | null
+          tenant_id: string
           updated_at: string
         }
         Insert: {
@@ -33,6 +34,7 @@ export type Database = {
           nama_unit: string
           status?: Database["public"]["Enums"]["unit_status"]
           template_id?: string | null
+          tenant_id: string
           updated_at?: string
         }
         Update: {
@@ -43,6 +45,7 @@ export type Database = {
           nama_unit?: string
           status?: Database["public"]["Enums"]["unit_status"]
           template_id?: string | null
+          tenant_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -53,6 +56,13 @@ export type Database = {
             referencedRelation: "unit_templates"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "business_units_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       chart_of_accounts: {
@@ -61,7 +71,7 @@ export type Database = {
           id: string
           kode: string
           nama: string
-          tipe: Database["public"]["Enums"]["account_type"]
+          tipe: Database["public"]["Enums"]["coa_tipe"]
           unit_id: string
         }
         Insert: {
@@ -69,7 +79,7 @@ export type Database = {
           id?: string
           kode: string
           nama: string
-          tipe: Database["public"]["Enums"]["account_type"]
+          tipe: Database["public"]["Enums"]["coa_tipe"]
           unit_id: string
         }
         Update: {
@@ -77,7 +87,7 @@ export type Database = {
           id?: string
           kode?: string
           nama?: string
-          tipe?: Database["public"]["Enums"]["account_type"]
+          tipe?: Database["public"]["Enums"]["coa_tipe"]
           unit_id?: string
         }
         Relationships: [
@@ -96,21 +106,21 @@ export type Database = {
           id: string
           kode: string
           nama: string
-          tipe: Database["public"]["Enums"]["account_type"]
+          tipe: Database["public"]["Enums"]["coa_tipe"]
         }
         Insert: {
           created_at?: string
           id?: string
           kode: string
           nama: string
-          tipe: Database["public"]["Enums"]["account_type"]
+          tipe: Database["public"]["Enums"]["coa_tipe"]
         }
         Update: {
           created_at?: string
           id?: string
           kode?: string
           nama?: string
-          tipe?: Database["public"]["Enums"]["account_type"]
+          tipe?: Database["public"]["Enums"]["coa_tipe"]
         }
         Relationships: []
       }
@@ -121,7 +131,7 @@ export type Database = {
           kode: string
           nama: string
           template_id: string
-          tipe: Database["public"]["Enums"]["account_type"]
+          tipe: Database["public"]["Enums"]["coa_tipe"]
         }
         Insert: {
           created_at?: string
@@ -129,7 +139,7 @@ export type Database = {
           kode: string
           nama: string
           template_id: string
-          tipe: Database["public"]["Enums"]["account_type"]
+          tipe: Database["public"]["Enums"]["coa_tipe"]
         }
         Update: {
           created_at?: string
@@ -137,7 +147,7 @@ export type Database = {
           kode?: string
           nama?: string
           template_id?: string
-          tipe?: Database["public"]["Enums"]["account_type"]
+          tipe?: Database["public"]["Enums"]["coa_tipe"]
         }
         Relationships: [
           {
@@ -239,6 +249,157 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          created_at: string
+          default_tenant_id: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_tenant_id?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_tenant_id?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_default_tenant_id_fkey"
+            columns: ["default_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_registrations: {
+        Row: {
+          agama: string | null
+          alamat: string | null
+          created_at: string
+          email: string
+          email_akses: string
+          gender: string | null
+          id: string
+          nama_bumdes: string
+          nama_desa: string
+          nama_kecamatan: string
+          nama_pemohon: string
+          nomor_whatsapp: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["registration_status"]
+          tenant_id: string | null
+        }
+        Insert: {
+          agama?: string | null
+          alamat?: string | null
+          created_at?: string
+          email: string
+          email_akses: string
+          gender?: string | null
+          id?: string
+          nama_bumdes: string
+          nama_desa: string
+          nama_kecamatan: string
+          nama_pemohon: string
+          nomor_whatsapp?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["registration_status"]
+          tenant_id?: string | null
+        }
+        Update: {
+          agama?: string | null
+          alamat?: string | null
+          created_at?: string
+          email?: string
+          email_akses?: string
+          gender?: string | null
+          id?: string
+          nama_bumdes?: string
+          nama_desa?: string
+          nama_kecamatan?: string
+          nama_pemohon?: string
+          nomor_whatsapp?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["registration_status"]
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_registrations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          alamat: string | null
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          email: string | null
+          id: string
+          kode_bumdes: string
+          nama_bumdes: string
+          nama_desa: string
+          nama_kecamatan: string
+          nomor_whatsapp: string | null
+          status: Database["public"]["Enums"]["tenant_status"]
+          updated_at: string
+        }
+        Insert: {
+          alamat?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          kode_bumdes: string
+          nama_bumdes: string
+          nama_desa: string
+          nama_kecamatan: string
+          nomor_whatsapp?: string | null
+          status?: Database["public"]["Enums"]["tenant_status"]
+          updated_at?: string
+        }
+        Update: {
+          alamat?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          kode_bumdes?: string
+          nama_bumdes?: string
+          nama_desa?: string
+          nama_kecamatan?: string
+          nomor_whatsapp?: string | null
+          status?: Database["public"]["Enums"]["tenant_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       unit_templates: {
         Row: {
           created_at: string
@@ -274,6 +435,7 @@ export type Database = {
           created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
+          tenant_id: string | null
           unit_id: string | null
           user_id: string
         }
@@ -281,6 +443,7 @@ export type Database = {
           created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
+          tenant_id?: string | null
           unit_id?: string | null
           user_id: string
         }
@@ -288,10 +451,18 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          tenant_id?: string | null
           unit_id?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_roles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_roles_unit_id_fkey"
             columns: ["unit_id"]
@@ -306,8 +477,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_tenant_registration: {
+        Args: { _registration_id: string }
+        Returns: Json
+      }
       can_access_unit: {
         Args: { _unit_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_manage_tenant: {
+        Args: { _tenant_id: string; _user_id: string }
         Returns: boolean
       }
       has_role: {
@@ -317,8 +496,16 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
-      user_unit_ids: { Args: { _user_id: string }; Returns: string[] }
+      is_super_admin_platform: { Args: { _user_id: string }; Returns: boolean }
+      is_tenant_member: {
+        Args: { _tenant_id: string; _user_id: string }
+        Returns: boolean
+      }
+      reject_tenant_registration: {
+        Args: { _reason: string; _registration_id: string }
+        Returns: undefined
+      }
+      unit_tenant_id: { Args: { _unit_id: string }; Returns: string }
     }
     Enums: {
       account_type:
@@ -328,7 +515,14 @@ export type Database = {
         | "PENDAPATAN"
         | "HPP"
         | "BEBAN"
-      app_role: "super_admin" | "admin_unit"
+      app_role:
+        | "super_admin_platform"
+        | "direktur_bumdes"
+        | "admin_bumdes"
+        | "manager_unit"
+      coa_tipe: "aset" | "kewajiban" | "ekuitas" | "pendapatan" | "beban"
+      registration_status: "pending" | "approved" | "rejected"
+      tenant_status: "pending" | "active" | "suspended"
       unit_status: "aktif" | "nonaktif"
     }
     CompositeTypes: {
@@ -465,7 +659,15 @@ export const Constants = {
         "HPP",
         "BEBAN",
       ],
-      app_role: ["super_admin", "admin_unit"],
+      app_role: [
+        "super_admin_platform",
+        "direktur_bumdes",
+        "admin_bumdes",
+        "manager_unit",
+      ],
+      coa_tipe: ["aset", "kewajiban", "ekuitas", "pendapatan", "beban"],
+      registration_status: ["pending", "approved", "rejected"],
+      tenant_status: ["pending", "active", "suspended"],
       unit_status: ["aktif", "nonaktif"],
     },
   },
