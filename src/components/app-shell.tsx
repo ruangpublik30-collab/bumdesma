@@ -2,7 +2,7 @@ import { Link, useRouter, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import {
   LayoutDashboard, Building2, BookOpen, FileBarChart, LogOut, Wallet, Scale, TrendingUp,
-  Inbox, ShieldCheck,
+  Inbox, ShieldCheck, Users, ShoppingCart, ShoppingBag, Database,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +14,10 @@ const navPlatform = [
 const navTenantAdmin = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/units", label: "Unit Usaha", icon: Building2 },
-  { to: "/jurnal", label: "Transaksi", icon: BookOpen },
+  { to: "/master-data", label: "Master Data", icon: Database },
+  { to: "/penjualan", label: "Penjualan", icon: ShoppingCart },
+  { to: "/pembelian", label: "Pembelian", icon: ShoppingBag },
+  { to: "/jurnal", label: "Buku Jurnal", icon: BookOpen },
   { to: "/laporan/laba-rugi", label: "Laba Rugi", icon: TrendingUp },
   { to: "/laporan/neraca", label: "Neraca", icon: Scale },
   { to: "/laporan/arus-kas", label: "Arus Kas", icon: Wallet },
@@ -23,11 +26,15 @@ const navTenantAdmin = [
 
 const navUnit = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/jurnal", label: "Transaksi", icon: BookOpen },
+  { to: "/master-data", label: "Master Data", icon: Database },
+  { to: "/penjualan", label: "Penjualan", icon: ShoppingCart },
+  { to: "/pembelian", label: "Pembelian", icon: ShoppingBag },
+  { to: "/jurnal", label: "Buku Jurnal", icon: BookOpen },
   { to: "/laporan/laba-rugi", label: "Laba Rugi", icon: TrendingUp },
   { to: "/laporan/neraca", label: "Neraca", icon: Scale },
   { to: "/laporan/arus-kas", label: "Arus Kas", icon: Wallet },
 ];
+void Users;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isPlatformAdmin, isTenantAdmin, currentTenant, signOut } = useAuth();

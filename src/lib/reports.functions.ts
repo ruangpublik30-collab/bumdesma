@@ -18,60 +18,57 @@ interface Line {
   nama: string;
   tipe: AccountType;
   debit: number;
-  kredit: number;
+  credit: number;
 }
 
-async function fetchLines(supabase: any, unitId: string | null, start: string, end: string): Promise<Line[]> {
+async function fetchLines(
+  supabase: any,
+  unitId: string | null,
+  start: string,
+  end: string,
+): Promise<Line[]> {
   let q = supabase
-    .from("journal_items")
+    .from("journal_entry_lines")
     .select(`
-      debit, kredit, unit_id,
-      account:chart_of_accounts!inner(id, kode, nama, tipe),
-      journal:journals!inner(tanggal, unit_id),
-      unit:business_units!inner(id, nama_unit)
+      debit, credit, account_id,
+      account:chart_of_accounts!inner(id, kode, nama, tipe, unit_id),
+      entry:journal_entries!inner(tanggal, unit_id, business_units!inner(id, nama_unit))
     `)
-    .gte("journal.tanggal", start)
-    .lte("journal.tanggal", end);
-  if (unitId) q = q.eq("unit_id", unitId);
+    .gte("entry.tanggal", start)
+    .lte("entry.tanggal", end);
+  if (unitId) q = q.eq("entry.unit_id", unitId);
   const { data, error } = await q;
   if (error) throw new Error(error.message);
   return ((data ?? []) as any[]).map((r) => ({
-    unit_id: r.unit_id,
-    unit_nama: r.unit?.nama_unit ?? "",
+    unit_id: r.entry.unit_id,
+    unit_nama: r.entry.business_units?.nama_unit ?? "",
     account_id: r.account.id,
     kode: r.account.kode,
     nama: r.account.nama,
     tipe: r.account.tipe as AccountType,
     debit: Number(r.debit) || 0,
-    kredit: Number(r.kredit) || 0,
+    credit: Number(r.credit) || 0,
   }));
 }
 
 interface AccountAgg {
-  account_id: string;
-  kode: string;
-  nama: string;
-  tipe: AccountType;
-  saldo: number;
+  account_id: string; kode: string; nama: string; tipe: AccountType; saldo: number;
 }
 
 function aggregate(lines: Line[]): AccountAgg[] {
   const map = new Map<string, AccountAgg>();
   for (const l of lines) {
-    const key = l.account_id;
-    const existing = map.get(key) ?? {
+    const e = map.get(l.account_id) ?? {
       account_id: l.account_id, kode: l.kode, nama: l.nama, tipe: l.tipe, saldo: 0,
     };
     const debitNormal = l.tipe === "aset" || l.tipe === "beban";
-    existing.saldo += debitNormal ? (l.debit - l.kredit) : (l.kredit - l.debit);
-    map.set(key, existing);
+    e.saldo += debitNormal ? l.debit - l.credit : l.credit - l.debit;
+    map.set(l.account_id, e);
   }
   return [...map.values()].sort((a, b) => a.kode.localeCompare(b.kode));
 }
 
-function isHpp(a: { kode: string; nama: string }): boolean {
-  return /hpp|harga pokok/i.test(a.nama) || a.kode.startsWith("5-1100");
-}
+const isHpp = (a: { kode: string; nama: string }) => /hpp|harga pokok/i.test(a.nama) || a.kode.startsWith("5-1");
 
 export const getProfitLoss = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -86,8 +83,7 @@ export const getProfitLoss = createServerFn({ method: "POST" })
     const totalHpp = hpp.reduce((s, a) => s + a.saldo, 0);
     const labaKotor = totalPendapatan - totalHpp;
     const totalBeban = beban.reduce((s, a) => s + a.saldo, 0);
-    const labaBersih = labaKotor - totalBeban;
-    return { pendapatan, hpp, beban, totalPendapatan, totalHpp, labaKotor, totalBeban, labaBersih };
+    return { pendapatan, hpp, beban, totalPendapatan, totalHpp, labaKotor, totalBeban, labaBersih: labaKotor - totalBeban };
   });
 
 export const getBalanceSheet = createServerFn({ method: "POST" })
@@ -113,9 +109,9 @@ export const getCashFlow = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => ReportInput.parse(i))
   .handler(async ({ data, context }) => {
     const lines = await fetchLines(context.supabase, data.unit_id, data.start_date, data.end_date);
-    const kasLines = lines.filter((l) => l.tipe === "aset" && l.kode.startsWith("1-1"));
+    const kasLines = lines.filter((l) => l.tipe === "aset" && (l.kode.startsWith("1-1") || /kas|bank/i.test(l.nama)));
     const masuk = kasLines.reduce((s, l) => s + l.debit, 0);
-    const keluar = kasLines.reduce((s, l) => s + l.kredit, 0);
+    const keluar = kasLines.reduce((s, l) => s + l.credit, 0);
     return { masuk, keluar, net: masuk - keluar, transaksi: kasLines.length };
   });
 
@@ -131,8 +127,8 @@ export const getDashboardStats = createServerFn({ method: "POST" })
     const pend = all.filter((a) => a.tipe === "pendapatan").reduce((s, a) => s + a.saldo, 0);
     const beban = all.filter((a) => a.tipe === "beban").reduce((s, a) => s + a.saldo, 0);
     const aset = all.filter((a) => a.tipe === "aset").reduce((s, a) => s + a.saldo, 0);
-    const kas = lines.filter((l) => l.tipe === "aset" && l.kode.startsWith("1-1"));
-    const saldoKasMutasi = kas.reduce((s, l) => s + l.debit - l.kredit, 0);
+    const kas = lines.filter((l) => l.tipe === "aset" && (l.kode.startsWith("1-1") || /kas|bank/i.test(l.nama)));
+    const saldoKasMutasi = kas.reduce((s, l) => s + l.debit - l.credit, 0);
     return {
       laba_bulan_ini: pend - beban,
       pendapatan_bulan_ini: pend,
