@@ -273,8 +273,9 @@ function NewPaymentDialog({ unitId, onClose }: { unitId: string; onClose: () => 
     setBusy(true);
     try {
       const nomor = `PAY-${Date.now()}`;
+      const { data: unitRow } = await supabase.from("business_units").select("tenant_id").eq("id", unitId).single();
       const { error } = await supabase.from("customer_payments")
-        .insert({ unit_id: unitId, customer_id: customerId, payment_date: tanggal, nomor_payment: nomor, amount: Number(amount), payment_method: method, status: "draft" });
+        .insert({ unit_id: unitId, tenant_id: unitRow!.tenant_id, customer_id: customerId, payment_date: tanggal, nomor_payment: nomor, amount: Number(amount), payment_method: method, status: "draft" });
       if (error) throw error;
       toast.success("Pembayaran tercatat (draft). Klik Posting untuk menjurnal.");
       onClose();

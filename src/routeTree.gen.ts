@@ -10,6 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnitsRouteImport } from './routes/units'
+import { Route as PenjualanRouteImport } from './routes/penjualan'
+import { Route as PembelianRouteImport } from './routes/pembelian'
+import { Route as MasterDataRouteImport } from './routes/master-data'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as JurnalRouteImport } from './routes/jurnal'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -25,6 +28,21 @@ import { Route as LaporanArusKasRouteImport } from './routes/laporan.arus-kas'
 const UnitsRoute = UnitsRouteImport.update({
   id: '/units',
   path: '/units',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PenjualanRoute = PenjualanRouteImport.update({
+  id: '/penjualan',
+  path: '/penjualan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PembelianRoute = PembelianRouteImport.update({
+  id: '/pembelian',
+  path: '/pembelian',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasterDataRoute = MasterDataRouteImport.update({
+  id: '/master-data',
+  path: '/master-data',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -89,6 +107,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/jurnal': typeof JurnalRoute
   '/login': typeof LoginRoute
+  '/master-data': typeof MasterDataRoute
+  '/pembelian': typeof PembelianRoute
+  '/penjualan': typeof PenjualanRoute
   '/units': typeof UnitsRoute
   '/laporan/arus-kas': typeof LaporanArusKasRoute
   '/laporan/konsolidasi': typeof LaporanKonsolidasiRoute
@@ -103,6 +124,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/jurnal': typeof JurnalRoute
   '/login': typeof LoginRoute
+  '/master-data': typeof MasterDataRoute
+  '/pembelian': typeof PembelianRoute
+  '/penjualan': typeof PenjualanRoute
   '/units': typeof UnitsRoute
   '/laporan/arus-kas': typeof LaporanArusKasRoute
   '/laporan/konsolidasi': typeof LaporanKonsolidasiRoute
@@ -118,6 +142,9 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/jurnal': typeof JurnalRoute
   '/login': typeof LoginRoute
+  '/master-data': typeof MasterDataRoute
+  '/pembelian': typeof PembelianRoute
+  '/penjualan': typeof PenjualanRoute
   '/units': typeof UnitsRoute
   '/laporan/arus-kas': typeof LaporanArusKasRoute
   '/laporan/konsolidasi': typeof LaporanKonsolidasiRoute
@@ -134,6 +161,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/jurnal'
     | '/login'
+    | '/master-data'
+    | '/pembelian'
+    | '/penjualan'
     | '/units'
     | '/laporan/arus-kas'
     | '/laporan/konsolidasi'
@@ -148,6 +178,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/jurnal'
     | '/login'
+    | '/master-data'
+    | '/pembelian'
+    | '/penjualan'
     | '/units'
     | '/laporan/arus-kas'
     | '/laporan/konsolidasi'
@@ -162,6 +195,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/jurnal'
     | '/login'
+    | '/master-data'
+    | '/pembelian'
+    | '/penjualan'
     | '/units'
     | '/laporan/arus-kas'
     | '/laporan/konsolidasi'
@@ -177,6 +213,9 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   JurnalRoute: typeof JurnalRoute
   LoginRoute: typeof LoginRoute
+  MasterDataRoute: typeof MasterDataRoute
+  PembelianRoute: typeof PembelianRoute
+  PenjualanRoute: typeof PenjualanRoute
   UnitsRoute: typeof UnitsRoute
   LaporanArusKasRoute: typeof LaporanArusKasRoute
   LaporanKonsolidasiRoute: typeof LaporanKonsolidasiRoute
@@ -193,6 +232,27 @@ declare module '@tanstack/react-router' {
       path: '/units'
       fullPath: '/units'
       preLoaderRoute: typeof UnitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/penjualan': {
+      id: '/penjualan'
+      path: '/penjualan'
+      fullPath: '/penjualan'
+      preLoaderRoute: typeof PenjualanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pembelian': {
+      id: '/pembelian'
+      path: '/pembelian'
+      fullPath: '/pembelian'
+      preLoaderRoute: typeof PembelianRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/master-data': {
+      id: '/master-data'
+      path: '/master-data'
+      fullPath: '/master-data'
+      preLoaderRoute: typeof MasterDataRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -281,6 +341,9 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   JurnalRoute: JurnalRoute,
   LoginRoute: LoginRoute,
+  MasterDataRoute: MasterDataRoute,
+  PembelianRoute: PembelianRoute,
+  PenjualanRoute: PenjualanRoute,
   UnitsRoute: UnitsRoute,
   LaporanArusKasRoute: LaporanArusKasRoute,
   LaporanKonsolidasiRoute: LaporanKonsolidasiRoute,
