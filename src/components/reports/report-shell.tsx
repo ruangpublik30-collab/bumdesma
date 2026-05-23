@@ -45,11 +45,9 @@ export function ReportShell({ title, subtitle, bumdes, periodLabel, children }: 
         html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: { mode: ["css", "legacy"] },
-      } as unknown as Parameters<ReturnType<typeof html2pdf>["set"]>[0];
-      await html2pdf()
-        .set(opts)
-        .from(printRef.current)
-        .save();
+      };
+      // @ts-expect-error html2pdf types are incomplete for pagebreak
+      await html2pdf().set(opts).from(printRef.current).save();
     } catch (err) {
       console.error("Export PDF gagal:", err);
       alert("Export PDF gagal. Silakan coba lagi.");
