@@ -127,9 +127,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pageTitle = items.find((i) => loc.pathname === i.to || loc.pathname.startsWith(i.to + "/"))?.label ?? "ERP BUMDes";
 
   return (
-    <div className="min-h-screen bg-[#F8FAF7]">
+    <div className="min-h-screen bg-[#F8FAF7] overflow-x-hidden">
       {/* Sidebar desktop */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-[260px] no-print">
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-[260px] h-screen overflow-y-auto no-print">
         <SidebarBody
           items={items}
           isPlatformAdmin={isPlatformAdmin}
@@ -142,7 +142,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Drawer mobile */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="p-0 w-[280px] border-r-0 bg-transparent">
+        <SheetContent side="left" className="p-0 w-[280px] max-w-[85vw] border-r-0 bg-transparent">
           <SidebarBody
             items={items}
             isPlatformAdmin={isPlatformAdmin}
@@ -156,20 +156,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </Sheet>
 
       {/* Topbar fixed */}
-      <header className="fixed top-0 right-0 left-0 md:left-[260px] z-30 bg-white border-b border-[#E5E7EB] shadow-[0_1px_2px_rgba(0,0,0,0.04)] no-print">
-        <div className="h-[72px] px-4 md:px-8 flex items-center gap-3">
+      <header className="fixed top-0 right-0 left-0 lg:left-[260px] z-30 bg-white border-b border-[#E5E7EB] shadow-[0_1px_2px_rgba(0,0,0,0.04)] no-print">
+        <div className="h-[72px] px-4 sm:px-5 lg:px-8 flex items-center gap-3 w-full min-w-0">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
-              <button className="md:hidden h-10 w-10 grid place-items-center rounded-lg hover:bg-[#F3F4F6] text-[#374151]">
+              <button className="shrink-0 lg:hidden h-10 w-10 grid place-items-center rounded-lg hover:bg-[#F3F4F6] text-[#374151]">
                 <Menu className="h-5 w-5" />
               </button>
             </SheetTrigger>
           </Sheet>
           <div className="min-w-0 flex-1">
-            <h1 className="font-display text-[18px] md:text-[20px] font-bold text-[#111827] truncate">
+            <h1 className="font-display text-[16px] sm:text-[18px] lg:text-[20px] font-bold text-[#111827] truncate">
               {pageTitle}
             </h1>
-            <p className="text-[12px] md:text-[13px] text-[#6B7280] truncate">
+            <p className="text-[12px] lg:text-[13px] text-[#6B7280] truncate">
               {isPlatformAdmin ? "Konsol Admin Platform" : currentTenant?.nama_bumdes ?? "BUMDes"}
             </p>
           </div>
@@ -177,9 +177,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main */}
-      <main className="md:ml-[260px] pt-[72px] min-h-screen">
-        <div className="p-4 md:p-6 lg:p-8">{children}</div>
+      <main className="lg:ml-[260px] pt-[88px] min-h-screen w-full max-w-full min-w-0 overflow-x-hidden">
+        <div className="px-4 sm:px-5 lg:px-8 pb-8">{children}</div>
       </main>
     </div>
+
   );
 }
