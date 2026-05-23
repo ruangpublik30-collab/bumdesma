@@ -70,7 +70,7 @@ function UnitDashboardOverview() {
         <p className="text-[14px] text-[#6B7280]">Data difilter otomatis berdasarkan unit ini.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <Stat label="Total Penjualan" value={formatIDR(data?.total_penjualan ?? 0)} icon={ShoppingCart} tone="green" />
         <Stat label="Piutang" value={formatIDR(data?.piutang ?? 0)} icon={Receipt} tone="blue" />
         <Stat label="Persediaan" value={formatIDR(data?.persediaan ?? 0)} icon={Package} tone="violet" />
