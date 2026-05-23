@@ -72,10 +72,10 @@ function UnitDashboardOverview() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <Stat label="Total Penjualan" value={formatIDR(data?.total_penjualan ?? 0)} icon={ShoppingCart} tone="green" />
-        <Stat label="Piutang" value={formatIDR(data?.piutang ?? 0)} icon={Receipt} tone="blue" />
-        <Stat label="Persediaan" value={formatIDR(data?.persediaan ?? 0)} icon={Package} tone="violet" />
+        <Stat label="Piutang" value={formatIDR(data?.piutang ?? 0)} icon={Receipt} tone="green" />
+        <Stat label="Persediaan" value={formatIDR(data?.persediaan ?? 0)} icon={Package} tone="green" />
         <Stat label="Kas & Bank" value={formatIDR(data?.kas_bank ?? 0)} icon={Wallet} tone="green" />
-        <Stat label="Hutang Supplier" value={formatIDR(data?.hutang ?? 0)} icon={FileText} tone="blue" />
+        <Stat label="Hutang Supplier" value={formatIDR(data?.hutang ?? 0)} icon={FileText} tone="orange" />
         <Stat label="Laba Bersih" value={formatIDR(data?.laba ?? 0)} icon={TrendingUp} tone="orange" />
       </div>
 
