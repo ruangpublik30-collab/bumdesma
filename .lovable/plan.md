@@ -1,58 +1,62 @@
-# Rencana Verifikasi Responsive — Semua Role & Breakpoint
+## Masalah
 
-Tujuan: memastikan tidak ada horizontal overflow saat sidebar fixed aktif, di semua role dan ukuran layar.
+`html2pdf.js` memakai `html2canvas` yang **tidak mendukung warna CSS modern `oklch()`**. Design tokens proyek di `src/styles.css` semuanya pakai `oklch()`, jadi begitu tombol Export PDF dipencet, parser canvas-nya langsung crash:
 
-## Breakpoint yang diuji
+```
+Error: Attempting to parse an unsupported color function "oklch"
+```
 
-| Label | Ukuran | Sidebar |
-|---|---|---|
-| Mobile S | 320×568 | drawer (hidden) |
-| Mobile M | 375×812 | drawer |
-| Mobile L | 414×896 | drawer |
-| Tablet | 768×1024 | drawer |
-| Laptop | 1280×720 | fixed 260px |
-| Desktop | 1536×864 | fixed 260px |
-| Desktop XL | 1920×1080 | fixed 260px |
+Ini bukan bug logika — murni keterbatasan library. Tidak ada hubungan dengan governance/akuntansi, jadi aman dikerjakan di lapisan frontend saja.
 
-## Role & halaman yang diuji
+## Rencana Perbaikan
 
-**Platform / Super Admin**
-- `/platform/dashboard`
-- `/platform/bumdes` (registrasi + daftar)
-- `/platform/users`, `/platform/governance`
+Ganti pipeline export PDF dari `html2pdf.js` (html2canvas v1) ke pendekatan yang mendukung `oklch`. Dua opsi realistis:
 
-**Direktur / Admin BUMDes**
-- `/dashboard`
-- `/units`
-- `/master-data`, `/jurnal`, `/penjualan`, `/pembelian`
+### Opsi A — Upgrade ke `html2canvas-pro` (recommended)
+- Fork modern dari html2canvas yang **sudah support `oklch`, `lab`, `color-mix`**.
+- Perubahan minimal: tetap pakai `jspdf`, tinggal swap engine canvas.
+- File yang disentuh hanya `src/components/reports/report-shell.tsx` + `package.json`.
 
-**Manager Unit** (`/unit/dashboard/:unitId/...`)
-- `index`, `sales`, `purchases`, `inventory`, `customers`, `suppliers`, `cash-bank`
+Langkah:
+1. `bun remove html2pdf.js` → `bun add html2canvas-pro jspdf`
+2. Rewrite `handleExportPdf` di `report-shell.tsx`:
+   - `html2canvas(printRef.current, { scale: 2, useCORS: true, backgroundColor: "#ffffff" })`
+   - Konversi canvas → image → `jsPDF` A4 portrait, multi-page bila tinggi > 297mm (loop slice per halaman).
+   - Filename + loading state sama seperti sekarang.
+3. Tetap pertahankan tombol "Cetak" (`window.print()`) apa adanya.
 
-## Yang diperiksa di setiap kombinasi
+### Opsi B — Force-override warna saat export
+- Bungkus `printRef` dengan class `pdf-export` yang meng-override semua token jadi `#hex` / `rgb()` via `@media` atau toggle class sebelum render.
+- Lebih rapuh: setiap komponen anak (badge, border, text-muted) harus diaudit. Riskan regresi visual.
 
-1. **Horizontal scroll**: `document.documentElement.scrollWidth === clientWidth` (tidak boleh ada scroll horizontal di `<html>` maupun `<main>`).
-2. **Sidebar fixed**: di ≥1024px sidebar menempel kiri, konten utama tidak tertimpa (margin kiri 260px diterapkan).
-3. **Topbar fixed**: tetap di atas, tidak menutupi konten (padding-top 88px).
-4. **Action button header**: tombol eksekusi (Tambah / Penjualan Cepat / dsb.) terlihat penuh, tidak terpotong di kanan.
-5. **Card & tabel**: tabel scroll internal (`overflow-x-auto`), tidak memaksa parent melebar. Warna hijau tipis konsisten (tidak ada biru tersisa).
-6. **Mobile drawer**: hamburger membuka/menutup, overlay menutup saat klik di luar, tidak mengunci scroll body permanen.
-7. **Typography & spacing**: tidak ada teks terpotong, tidak ada padding negatif yang bikin overflow.
+**Saya rekomendasikan Opsi A** karena satu file berubah, tidak menyentuh design system, dan hasil PDF identik dengan tampilan layar.
 
-## Metodologi
+## Verifikasi Setelah Fix
 
-Untuk tiap kombinasi role × breakpoint:
+1. Buka `/laporan/neraca`, `/laporan/laba-rugi`, `/laporan/arus-kas`, `/laporan/konsolidasi`, dan `/unit/dashboard/:unitId/reports`.
+2. Klik "Export PDF" → file `.pdf` ter-download, bukan dialog cetak.
+3. Buka PDF: header BUMDes, tabel staffel, dan footer tampil benar, warna biru navy `#1e3a8a` tetap muncul.
+4. Multi-halaman: laporan konsolidasi panjang harus terpotong rapi per A4.
 
-1. `browser--navigate_to_sandbox` ke route dengan viewport target.
-2. `browser--screenshot` untuk inspeksi visual (header + body).
-3. `browser--act` jalankan snippet pengukuran via console — record `scrollWidth`, `clientWidth`, dan posisi tombol header (`getBoundingClientRect().right` vs `window.innerWidth`).
-4. Catat status: OK / Overflow / Button clipped / Sidebar overlap.
+## Detail Teknis
 
-## Output
+- `html2canvas-pro` API drop-in compatible dengan `html2canvas`.
+- Multi-page split:
+  ```ts
+  const imgH = canvas.height * (pageW / canvas.width);
+  let heightLeft = imgH;
+  let position = 0;
+  pdf.addImage(img, "JPEG", 0, position, pageW, imgH);
+  heightLeft -= pageH;
+  while (heightLeft > 0) {
+    position = heightLeft - imgH;
+    pdf.addPage();
+    pdf.addImage(img, "JPEG", 0, position, pageW, imgH);
+    heightLeft -= pageH;
+  }
+  ```
+- Tidak ada perubahan di `styles.css`, route, atau RPC/database.
 
-Laporan tabel ringkas per role × breakpoint dengan kolom: Overflow, Sidebar OK, Topbar OK, Button OK, Catatan. Jika ditemukan masalah, sertakan screenshot crop sebagai bukti dan rekomendasi perbaikan (CSS class spesifik) — tanpa langsung mengubah kode di mode plan.
+## Status
 
-## Asumsi & catatan
-
-- Login diperlukan untuk role-protected route. Jika preview belum login, saya akan minta user login dulu sebelum melanjutkan route privat.
-- Saya tidak memodifikasi kode pada fase verifikasi ini. Setelah laporan selesai, perbaikan dibuat dalam plan terpisah.
+Saya **bisa lanjutkan** project ini. Error sebelumnya murni karena pilihan library `html2pdf.js` yang sudah outdated terhadap CSS modern — bukan kesalahan arsitektur. Setujui plan ini dan saya implementasikan Opsi A.

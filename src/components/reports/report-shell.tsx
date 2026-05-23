@@ -36,18 +36,34 @@ export function ReportShell({ title, subtitle, bumdes, periodLabel, children }: 
     if (!printRef.current || exporting) return;
     setExporting(true);
     try {
-      const html2pdf = (await import("html2pdf.js")).default;
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("html2canvas-pro"),
+        import("jspdf"),
+      ]);
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgH = (canvas.height * pageW) / canvas.width;
+
+      let heightLeft = imgH;
+      let position = 0;
+      pdf.addImage(imgData, "JPEG", 0, position, pageW, imgH);
+      heightLeft -= pageH;
+      while (heightLeft > 0) {
+        position = heightLeft - imgH;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 0, position, pageW, imgH);
+        heightLeft -= pageH;
+      }
+
       const filename = `${slugify(title)}-${slugify(bumdes.nama_bumdes ?? "bumdes")}-${Date.now()}.pdf`;
-      const opts = {
-        margin: 0,
-        filename,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["css", "legacy"] },
-      };
-      // @ts-expect-error html2pdf types are incomplete for pagebreak
-      await html2pdf().set(opts).from(printRef.current).save();
+      pdf.save(filename);
     } catch (err) {
       console.error("Export PDF gagal:", err);
       alert("Export PDF gagal. Silakan coba lagi.");
