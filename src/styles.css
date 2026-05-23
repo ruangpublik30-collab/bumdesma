@@ -55,8 +55,8 @@
   --popover-foreground: oklch(0.21 0.02 260);
   --primary: oklch(0.62 0.17 150);             /* #16A34A hijau */
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.55 0.20 260);           /* #2563EB biru */
-  --secondary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.965 0.035 150);         /* #ECFDF5 hijau tipis untuk header tabel */
+  --secondary-foreground: oklch(0.38 0.10 150);/* #166534 hijau gelap */
   --muted: oklch(0.96 0.005 150);
   --muted-foreground: oklch(0.50 0.01 260);    /* #6B7280 */
   --accent: oklch(0.70 0.18 50);               /* #F97316 oranye */
