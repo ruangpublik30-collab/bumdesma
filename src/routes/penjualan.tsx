@@ -89,7 +89,7 @@ function InvoicesTab({ unitId }: { unitId: string }) {
         </Dialog>
       </div>
       <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[720px]">
           <thead className="bg-secondary"><tr className="text-left">
             <th className="px-4 py-3">Tanggal</th><th className="px-4 py-3">Nomor</th><th className="px-4 py-3">Pelanggan</th>
             <th className="px-4 py-3 text-right">Total</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Aksi</th>
@@ -229,7 +229,7 @@ function PaymentsTab({ unitId }: { unitId: string }) {
         </Dialog>
       </div>
       <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[720px]">
           <thead className="bg-secondary"><tr className="text-left">
             <th className="px-4 py-3">Tanggal</th><th className="px-4 py-3">Nomor</th><th className="px-4 py-3">Pelanggan</th>
             <th className="px-4 py-3">Metode</th><th className="px-4 py-3 text-right">Jumlah</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Aksi</th>
@@ -317,7 +317,7 @@ function ARTab({ unitId }: { unitId: string }) {
   });
   return (
     <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="w-full text-sm min-w-[720px]">
         <thead className="bg-secondary"><tr className="text-left">
           <th className="px-4 py-3">Tanggal</th><th className="px-4 py-3">Invoice</th><th className="px-4 py-3">Pelanggan</th>
           <th className="px-4 py-3 text-right">Total</th><th className="px-4 py-3 text-right">Dibayar</th>

@@ -107,7 +107,7 @@ function CustomersTab({ unitId }: { unitId: string }) {
         </Dialog>
       </div>
       <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[720px]">
           <thead className="bg-secondary"><tr className="text-left"><th className="px-4 py-3">Nama</th><th className="px-4 py-3">Kontak</th><th className="px-4 py-3">Alamat</th></tr></thead>
           <tbody className="divide-y">
             {isLoading && <tr><td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">Memuat…</td></tr>}
@@ -152,7 +152,7 @@ function SuppliersTab({ unitId }: { unitId: string }) {
         </Dialog>
       </div>
       <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[720px]">
           <thead className="bg-secondary"><tr className="text-left"><th className="px-4 py-3">Nama</th><th className="px-4 py-3">Kontak</th><th className="px-4 py-3">Alamat</th></tr></thead>
           <tbody className="divide-y">
             {isLoading && <tr><td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">Memuat…</td></tr>}
@@ -213,7 +213,7 @@ function ItemsTab({ unitId }: { unitId: string }) {
         </Dialog>
       </div>
       <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[720px]">
           <thead className="bg-secondary"><tr className="text-left">
             <th className="px-4 py-3">Kode</th><th className="px-4 py-3">Nama</th><th className="px-4 py-3">Satuan</th>
             <th className="px-4 py-3 text-right">Harga Beli</th><th className="px-4 py-3 text-right">Harga Jual</th><th className="px-4 py-3 text-right">Stok</th>

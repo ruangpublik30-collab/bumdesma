@@ -45,7 +45,7 @@ function UnitsPage() {
       </div>
 
       <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[720px]">
           <thead className="bg-secondary text-secondary-foreground">
             <tr className="text-left">
               <th className="px-4 py-3 font-medium">Nama Unit</th>
