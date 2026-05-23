@@ -26,6 +26,7 @@ function APStatus({ value }: { value: string | null }) {
 
 function PayablesPage() {
   const { unitId } = Route.useParams();
+  const qc = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ["unit-ap", unitId],
     queryFn: async () =>
