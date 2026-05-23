@@ -91,8 +91,8 @@ function useUnitAccounts(unitId: string, enabled: boolean, filter?: (a: any) => 
 function ExpenseDialog({ unitId, onSuccess }: { unitId: string; onSuccess: () => void }) {
   const [open, setOpen] = useState(false);
   const [f, setF] = useState({ tanggal: new Date().toISOString().slice(0, 10), jumlah: "0", deskripsi: "", expense_account_id: "", account_id: "" });
-  const cashAccounts = useUnitAccounts(unitId, open, (a) => a.account_category === "cash" || a.account_category === "bank" || /^1[12]/.test(a.kode ?? ""));
-  const expenseAccounts = useUnitAccounts(unitId, open, (a) => a.account_type === "expense" || a.account_type === "beban");
+  const cashAccounts = useUnitAccounts(unitId, open, (a) => a.tipe === "aset" && /^1-1/.test(a.kode ?? ""));
+  const expenseAccounts = useUnitAccounts(unitId, open, (a) => a.tipe === "beban");
 
   const m = useMutation({
     mutationFn: async () => {
@@ -150,7 +150,7 @@ function ExpenseDialog({ unitId, onSuccess }: { unitId: string; onSuccess: () =>
 function TransferDialog({ unitId, onSuccess }: { unitId: string; onSuccess: () => void }) {
   const [open, setOpen] = useState(false);
   const [f, setF] = useState({ tanggal: new Date().toISOString().slice(0, 10), jumlah: "0", deskripsi: "", from_account_id: "", to_account_id: "" });
-  const cashAccounts = useUnitAccounts(unitId, open, (a) => a.account_category === "cash" || a.account_category === "bank" || /^1[12]/.test(a.kode ?? ""));
+  const cashAccounts = useUnitAccounts(unitId, open, (a) => a.tipe === "aset" && /^1-1/.test(a.kode ?? ""));
 
   const m = useMutation({
     mutationFn: async () => {
