@@ -53,8 +53,8 @@ function SalesPage() {
         </div>
         <QuickCashSaleDialog unitId={unitId} onSuccess={() => qc.invalidateQueries({ queryKey: ["unit-sales", unitId] })} />
       </div>
-      <div className="rounded-lg border bg-card overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm overflow-x-auto">
+        <table className="w-full text-sm min-w-[720px]">
           <thead className="bg-secondary"><tr className="text-left">
             <th className="px-4 py-3 font-medium">Nomor</th>
             <th className="px-4 py-3 font-medium">Tanggal</th>

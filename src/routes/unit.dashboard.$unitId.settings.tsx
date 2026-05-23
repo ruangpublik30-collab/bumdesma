@@ -35,9 +35,9 @@ function SettingsPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border bg-card overflow-hidden">
+      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm overflow-x-auto">
         <div className="px-5 py-3 border-b font-display font-semibold">Akses Manager Unit</div>
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[720px]">
           <thead className="bg-secondary"><tr className="text-left">
             <th className="px-4 py-3 font-medium">Login Code</th>
             <th className="px-4 py-3 font-medium">Email Virtual</th>
