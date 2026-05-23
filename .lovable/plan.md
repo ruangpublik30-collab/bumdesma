@@ -1,139 +1,78 @@
-# Refaktor Multi-Tenant: Platform Super Admin + Pendaftaran BUMDes
+## Tujuan
+Membersihkan seluruh sisa desain lama (navy + marun + emas) yang masih muncul setelah login, dan menyelaraskan seluruh sistem ke palet baru: **putih · hijau (#16A34A) · biru (#2563EB) · oranye (#F97316)** dengan layout responsif (sidebar fixed + hamburger drawer di mobile) — sama persis seperti UnitShell.
 
-Mengubah sistem dari single-BUMDes menjadi platform multi-tenant. Setiap BUMDes mendaftar lewat form publik, ditinjau oleh Super Admin Platform, dan setelah disetujui mendapat akun login Direktur BUMDes beserta workspace tenant tersendiri. Logika unit usaha berbasis template + auto-provisioning COA dipertahankan, hanya ditambahkan dimensi `tenant_id`.
+Logika bisnis, query database, RPC, dan struktur data **tidak diubah sama sekali**. Semua pekerjaan murni di lapisan presentasi.
 
-## Arsitektur Baru
+---
 
-```text
-Super Admin Platform  ──▶ kelola semua tenant + approve pendaftaran
-       │
-       ▼
-   Tenant (BUMDes)  ──▶ Direktur / Admin BUMDes
-       │
-       ▼
-   Business Unit  ──▶ Manager Unit (akses 1 unit)
-       │
-       ▼
-   COA → Jurnal → Laporan
-```
+## 1. Ganti token palet global (`src/styles.css`)
 
-## Reset Data
+Tulis ulang `:root` dan `.dark` agar:
+- `--background` = putih lembut, `--foreground` = abu gelap (#111827)
+- `--primary` = hijau #16A34A, `--primary-foreground` = putih
+- `--accent` = oranye #F97316
+- `--secondary` = biru #2563EB (untuk badge/ikon info)
+- `--success` = hijau, `--warning` = oranye, `--destructive` = merah netral
+- `--sidebar` = putih kehijauan (#F4FBF6), `--sidebar-foreground` = abu gelap, `--sidebar-primary` = hijau #16A34A, `--sidebar-primary-foreground` = putih, `--sidebar-accent` = hijau muda (#EAF7EE)
+- `--border` = #E5E7EB, `--input` = #E5E7EB, `--ring` = hijau
+- Radius default dinaikkan ke `0.75rem`
 
-Sesuai pilihan, semua data lama dihapus (drop tables: business_units, chart_of_accounts, journals, journal_items, user_roles, unit_templates, coa_template_unit, coa_template_global, plus enum lama). Schema dibangun ulang dari nol mengikuti arsitektur baru. Template unit dan global COA di-seed ulang setelah migrasi.
+Ini sekaligus menyelesaikan masalah "warna navy" di semua komponen lama tanpa harus menyentuh tiap file.
 
-## Skema Database
+Blok `@media print` dipertahankan persis seperti sekarang.
 
-Tabel baru / dirombak:
+## 2. Tulis ulang `src/components/app-shell.tsx` (shell Direktur/Platform)
 
-- `tenants` — data BUMDes (nama, kode auto `BUM-0001`, desa, kecamatan, status: pending/active/suspended).
-- `tenant_registrations` — submission form publik. Bisa diisi anon. Status: pending/approved/rejected.
-- `business_units` — ditambah `tenant_id` (NOT NULL, FK cascade). Unique `(tenant_id, kode_unit)`. Tetap punya `template_id`.
-- `unit_templates` — tetap (template Dagang, Simpan Pinjam, dst). Global, dipakai semua tenant.
-- `coa_template_global`, `coa_template_unit` — tetap, jadi sumber auto-provisioning COA per unit baru.
-- `chart_of_accounts` — tetap (per unit_id). Tenant_id diturunkan via unit.
-- `journals`, `journal_items` — tetap (per unit_id).
-- `profiles` — baru, simpan `full_name`, `phone`, `default_tenant_id`.
-- `user_roles` — dirombak: `(user_id, role, tenant_id?, unit_id?)`. Enum role baru: `super_admin_platform`, `direktur_bumdes`, `admin_bumdes`, `manager_unit`.
+Pola dibuat **identik dengan `UnitShell`**:
+- `aside` desktop `hidden md:flex fixed inset-y-0 left-0 z-40 w-[260px]`
+- Drawer mobile pakai `Sheet` dari `@/components/ui/sheet` + tombol hamburger di topbar
+- Topbar `fixed top-0 right-0 left-0 md:left-[260px] z-30 h-[72px]` dengan judul halaman aktif + email user di kanan
+- Konten utama `md:ml-[260px] pt-[72px]` + padding responsif `p-4 md:p-6 lg:p-8`
+- Item nav aktif: `bg-[#16A34A] text-white`; non-aktif: `text-[#1F2937] hover:bg-[#EAF7EE]`
+- Brand block sama: kotak hijau + huruf B, nama "ERP BUMDes" / "Admin Platform", subtitle nama BUMDes
+- Footer sidebar: email + role + tombol "Keluar" hijau
+- Tetap baca `isPlatformAdmin / isTenantAdmin` dari `useAuth` untuk memilih `navPlatform / navTenantAdmin / navUnit` — daftar menu tidak berubah
 
-Enum: `tenant_status`, `registration_status`, `app_role` (4 role di atas).
+Tidak ada perubahan rute atau perilaku navigasi.
 
-Security definer functions:
-- `is_super_admin_platform(uid)`
-- `is_tenant_member(uid, tenant_id)`
-- `can_manage_tenant(uid, tenant_id)` — direktur/admin BUMDes atau super admin platform
-- `can_access_unit(uid, unit_id)` — diturunkan via join unit→tenant→roles
-- `has_role(uid, role)`
+## 3. Login page (`src/routes/login.tsx`)
 
-RLS:
-- `tenant_registrations`: INSERT terbuka untuk anon (form publik). SELECT/UPDATE hanya super admin platform.
-- `tenants`: super admin platform full akses. Member tenant: SELECT tenant sendiri.
-- `business_units` & `chart_of_accounts` & `journals` & `journal_items`: super admin platform full, member tenant SELECT, direktur/admin BUMDes manage units & COA, anggota unit CRUD jurnal sesuai akses unit.
-- `profiles`: user lihat/edit milik sendiri, super admin platform lihat semua.
-- `user_roles`: user lihat role sendiri, super admin platform manage. Direktur BUMDes bisa manage role manager_unit di tenant-nya.
+Panel kiri navy diganti:
+- Background `bg-[#F4FBF6]` dengan ilustrasi blok hijau muda + aksen oranye
+- Heading & body teks pakai `text-[#111827]` / `text-[#6B7280]`
+- Tombol `Masuk` pakai `bg-[#16A34A] hover:bg-[#15803D]`
+- Link "Daftarkan BUMDes" pakai underline biru #2563EB
 
-Trigger:
-- `handle_new_user` di `auth.users`: auto-insert profiles. Bootstrap: jika belum ada `super_admin_platform`, user pertama yang signup otomatis jadi platform admin.
-- `provision_unit_coa` di `business_units` AFTER INSERT: tetap, generate COA dari template (global + per template_id).
-- `set_updated_at` di tenants/profiles.
+Tidak mengubah logika `signInWithPassword`, `routeAfterLogin`, atau `refreshRoles`.
 
-RPC (security definer, dipanggil dari server function):
-- `approve_tenant_registration(reg_id)` → buat tenant, generate kode `BUM-XXXX`, return tenant_id. Akun direktur dibuat di server function (bukan di RPC) karena perlu auth.admin.
-- `reject_tenant_registration(reg_id, reason)`.
+## 4. Landing (`src/routes/index.tsx`)
 
-## Server Functions (`createServerFn`)
+- Header: logo kotak hijau, tombol "Masuk" outline hijau, tombol "Daftarkan BUMDes" solid hijau
+- Hero: badge biru muda, judul dengan span hijau, tombol CTA hijau & outline
+- Kartu fitur: `rounded-2xl border-[#E5E7EB] bg-white shadow-sm` dengan ikon di kotak hijau/biru/oranye
 
-`src/lib/registrations.functions.ts` (baru):
-- `submitRegistration` — anon-friendly (tanpa middleware auth). Insert ke `tenant_registrations`. Validasi Zod.
-- `listRegistrations` — super admin platform: list pending/approved/rejected.
-- `approveRegistration({ registration_id })` — middleware requireSupabaseAuth + cek super admin platform:
-  1. Generate password random (16 char).
-  2. `supabaseAdmin.auth.admin.createUser` dengan email_akses + password + email_confirm.
-  3. Panggil RPC `approve_tenant_registration` → dapat tenant_id + kode.
-  4. Insert role `direktur_bumdes` (user_id, tenant_id).
-  5. Update profiles.default_tenant_id.
-  6. Update registration set tenant_id + reviewed_by.
-  7. Return `{ email, password, kode_bumdes, nama_bumdes }` — UI tampilkan SEKALI (modal, dengan tombol copy & warning).
-- `rejectRegistration({ registration_id, reason })`.
+## 5. Halaman dalam Direktur (penyelarasan ringan, tanpa ubah data)
 
-`src/lib/units.functions.ts` (refaktor):
-- `createBusinessUnit` — sekarang per tenant. Cek caller adalah direktur/admin BUMDes di tenant tsb (atau super admin platform). Tidak lagi membuat user auth — manager_unit ditambah lewat flow terpisah.
-- `inviteUnitManager({ tenant_id, unit_id, email, password })` — direktur BUMDes/super admin platform: createUser + role manager_unit.
+File: `dashboard.tsx`, `units.tsx`, `master-data.tsx`, `penjualan.tsx`, `pembelian.tsx`, `jurnal.tsx`, `laporan.laba-rugi.tsx`, `laporan.neraca.tsx`, `laporan.arus-kas.tsx`, `laporan.konsolidasi.tsx`, `platform.pendaftaran.tsx`, `platform.bumdes.tsx`.
 
-`src/lib/reports.functions.ts` (refaktor):
-- Semua report filter berdasarkan `tenant_id` dari konteks user (atau dipilih super admin platform).
-- "Konsolidasi" = konsolidasi semua unit dalam 1 tenant. Super admin platform bisa lihat per tenant.
+Penyesuaian seragam di tiap file (search-replace minor, tanpa mengubah query):
+- Kartu/section: `rounded-lg border bg-card` → `rounded-2xl border border-[#E5E7EB] bg-white shadow-sm`
+- Tabel: bungkus `overflow-x-auto` + `min-w-[720px]` agar responsif di mobile (sama seperti modul unit)
+- Tombol utama: pastikan pakai varian `default` (akan otomatis hijau lewat token baru) — tidak perlu kelas warna eksplisit
+- Judul halaman: `font-display text-[22px] md:text-[24px] font-bold text-[#111827]`
+- Subtitle: `text-[14px] text-[#6B7280]`
 
-## Routing (TanStack)
+Tidak ada perubahan kolom, filter, RPC, atau urutan data.
 
-Layout baru:
-- `src/routes/_platform.tsx` — layout super admin platform (sidebar: Pendaftaran, Daftar BUMDes, Pengaturan).
-- `src/routes/_tenant.tsx` — layout BUMDes (sidebar: Dashboard, Unit, Jurnal, Laporan).
+## 6. QA
 
-Route baru / diubah:
-- `src/routes/index.tsx` — landing publik dengan CTA "Daftarkan BUMDes" + "Masuk".
-- `src/routes/daftar.tsx` — form publik pendaftaran (sesuai gambar 1). Submit ke `submitRegistration`. Tampilkan halaman sukses "Pendaftaran Anda sedang ditinjau".
-- `src/routes/login.tsx` — login universal. Setelah login redirect berdasar role:
-  - `super_admin_platform` → `/platform/pendaftaran`
-  - lainnya → `/dashboard` (tenant)
-- `src/routes/_platform/pendaftaran.tsx` — list registrations (gambar 2). Tab: Pending / Approved / Rejected. Aksi Approve → tampilkan modal kredensial. Reject → form alasan.
-- `src/routes/_platform/bumdes.tsx` — list tenant aktif, status, jumlah unit.
-- `src/routes/_tenant/dashboard.tsx` — pindahan dari `/dashboard`.
-- `src/routes/_tenant/units.tsx` — pindahan, scoped ke tenant.
-- `src/routes/_tenant/jurnal.tsx` — pindahan.
-- `src/routes/_tenant/laporan.*.tsx` — pindahan.
+- Buka `/login`, `/`, `/dashboard`, `/units`, `/jurnal`, `/laporan/neraca`, `/platform/pendaftaran` di viewport 390px dan 1280px
+- Pastikan: tidak ada lagi blok navy/marun/emas, sidebar di mobile sembunyi & muncul lewat hamburger, topbar fixed, tabel scroll horizontal di mobile
+- Pastikan halaman cetak (`print-area`) tetap rapi karena blok `@media print` tidak diubah
 
-`Protected` component diupdate: prop `require: "platform" | "tenant_admin" | "tenant_member"`. `auth-context` expose: `roles`, `isPlatformAdmin`, `tenantId`, `tenantRoles`, `currentTenant`.
+---
 
-## UI/UX Penting
-
-Halaman pendaftaran (`/daftar`) mengikuti layout gambar 1: card formal, field wajib bertanda `*`, tombol "Kirim Pendaftaran" lebar penuh, link "← Kembali" ke landing.
-
-Halaman approval (`/platform/pendaftaran`) mengikuti gambar 2: tabel/list registration dengan badge status, tombol "Setujui" & "Tolak". Modal hasil approve menampilkan:
-- Nama BUMDes + kode BUM-XXXX
-- Email login direktur
-- Password sementara (tombol copy)
-- Peringatan: "Salin sekarang — password tidak akan ditampilkan lagi"
-
-## Bootstrap Super Admin Platform
-
-User pertama yang signup di `/login` (mode register) otomatis dapat role `super_admin_platform` via trigger `handle_new_user` (cek `NOT EXISTS (SELECT 1 FROM user_roles WHERE role='super_admin_platform')`). Signup berikutnya = user biasa tanpa role (harus diundang via approve registration atau invite manager_unit).
-
-## Catatan Teknis
-
-- Semua relasi pakai UUID, FK on delete cascade (tenant → unit → coa/journals).
-- `kode_bumdes` digenerate di RPC `approve_tenant_registration` (sequence sederhana `BUM-` + 4 digit).
-- `supabase--migration` digunakan untuk drop + recreate schema, RLS, trigger, RPC.
-- Setelah migrasi disetujui: seed ulang `unit_templates` + `coa_template_global` + `coa_template_unit` lewat `supabase--insert`.
-- `attachSupabaseAuth` di `start.ts` tetap (sudah ada).
-- Tidak ada perubahan ke `client.ts`, `client.server.ts`, `auth-middleware.ts`, `types.ts` (auto-generated setelah migrasi).
-
-## Urutan Eksekusi (setelah plan disetujui)
-
-1. Migrasi DB: drop schema lama, buat enum + tabel + RPC + trigger + RLS baru.
-2. Seed `unit_templates`, `coa_template_global`, `coa_template_unit`.
-3. Refaktor `auth-context` + `Protected`.
-4. Tulis server functions (`registrations.functions.ts`, refaktor `units.functions.ts`, `reports.functions.ts`).
-5. Buat route publik `/daftar` + update `/login` + landing.
-6. Buat layout `_platform` + halaman pendaftaran & daftar BUMDes (dengan modal kredensial).
-7. Pindahkan halaman tenant ke `_tenant` layout.
-8. Verifikasi: register super admin → submit pendaftaran dari /daftar → approve → login sebagai direktur → tambah unit → input jurnal → lihat laporan.
+## Catatan kepatuhan
+- Tidak ada perubahan skema database, RLS, RPC, edge function, atau file di `supabase/`
+- Tidak ada perubahan pada `src/lib/unit-actions.ts`, `src/lib/*.functions.ts`, `src/integrations/supabase/*`
+- Komponen `ReportShell` & `NeracaStaffel` tidak disentuh — hanya akan ikut palet baru lewat token
