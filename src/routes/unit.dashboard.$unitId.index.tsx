@@ -32,28 +32,23 @@ function UnitDashboardOverview() {
   const { data } = useQuery({
     queryKey: ["unit-overview", unitId],
     queryFn: async () => {
-      const [sales, ar, stock, cashbank, ap, pnl] = await Promise.all([
-        supabase.from("sales_invoices").select("id, total:sales_invoice_lines(subtotal)").eq("unit_id", unitId),
-        supabase.from("v_accounts_receivable").select("outstanding").eq("unit_id", unitId),
+      const [ar, stock, cashbank, ap, pnl] = await Promise.all([
+        supabase.from("v_accounts_receivable").select("total_invoice, outstanding_amount").eq("unit_id", unitId),
         supabase.from("v_inventory_stock").select("nilai_persediaan").eq("unit_id", unitId),
         supabase.from("v_cash_bank_balance").select("saldo").eq("unit_id", unitId),
-        supabase.from("v_accounts_payable").select("outstanding").eq("unit_id", unitId),
-        supabase.from("v_income_statement_summary").select("laba_bersih, pendapatan").eq("unit_id", unitId).maybeSingle(),
+        supabase.from("v_accounts_payable").select("outstanding_amount").eq("unit_id", unitId),
+        supabase.from("v_income_statement_summary").select("laba_bersih, total_pendapatan").eq("unit_id", unitId).maybeSingle(),
       ]);
       const sumCol = (rows: any[] | null, col: string) =>
         (rows ?? []).reduce((s, r) => s + num(r?.[col]), 0);
-      const totalSales = (sales.data ?? []).reduce((s: number, inv: any) => {
-        const lines = inv.total ?? [];
-        return s + lines.reduce((ss: number, l: any) => ss + num(l.subtotal), 0);
-      }, 0);
       return {
-        total_penjualan: totalSales,
-        piutang: sumCol(ar.data as any[], "outstanding"),
+        total_penjualan: sumCol(ar.data as any[], "total_invoice"),
+        piutang: sumCol(ar.data as any[], "outstanding_amount"),
         persediaan: sumCol(stock.data as any[], "nilai_persediaan"),
         kas_bank: sumCol(cashbank.data as any[], "saldo"),
-        hutang: sumCol(ap.data as any[], "outstanding"),
+        hutang: sumCol(ap.data as any[], "outstanding_amount"),
         laba: num((pnl.data as any)?.laba_bersih),
-        pendapatan: num((pnl.data as any)?.pendapatan),
+        pendapatan: num((pnl.data as any)?.total_pendapatan),
       };
     },
   });
