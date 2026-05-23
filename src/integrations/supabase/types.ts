@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounting_periods: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          closing_note: string | null
+          created_at: string
+          end_date: string
+          id: string
+          period_month: number
+          period_year: number
+          start_date: string
+          status: string
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_note?: string | null
+          created_at?: string
+          end_date: string
+          id?: string
+          period_month: number
+          period_year: number
+          start_date: string
+          status?: string
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_note?: string | null
+          created_at?: string
+          end_date?: string
+          id?: string
+          period_month?: number
+          period_year?: number
+          start_date?: string
+          status?: string
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       accounting_rule_settings: {
         Row: {
           bank_account_id: string | null
@@ -77,6 +122,13 @@ export type Database = {
             foreignKeyName: "accounting_rule_settings_bank_account_id_fkey"
             columns: ["bank_account_id"]
             isOneToOne: false
+            referencedRelation: "v_equity_rollforward"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "accounting_rule_settings_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
             referencedRelation: "v_general_ledger"
             referencedColumns: ["account_id"]
           },
@@ -112,6 +164,13 @@ export type Database = {
             foreignKeyName: "accounting_rule_settings_cash_account_id_fkey"
             columns: ["cash_account_id"]
             isOneToOne: false
+            referencedRelation: "v_equity_rollforward"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "accounting_rule_settings_cash_account_id_fkey"
+            columns: ["cash_account_id"]
+            isOneToOne: false
             referencedRelation: "v_general_ledger"
             referencedColumns: ["account_id"]
           },
@@ -147,6 +206,13 @@ export type Database = {
             foreignKeyName: "accounting_rule_settings_cogs_account_id_fkey"
             columns: ["cogs_account_id"]
             isOneToOne: false
+            referencedRelation: "v_equity_rollforward"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "accounting_rule_settings_cogs_account_id_fkey"
+            columns: ["cogs_account_id"]
+            isOneToOne: false
             referencedRelation: "v_general_ledger"
             referencedColumns: ["account_id"]
           },
@@ -182,6 +248,13 @@ export type Database = {
             foreignKeyName: "accounting_rule_settings_inventory_account_id_fkey"
             columns: ["inventory_account_id"]
             isOneToOne: false
+            referencedRelation: "v_equity_rollforward"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "accounting_rule_settings_inventory_account_id_fkey"
+            columns: ["inventory_account_id"]
+            isOneToOne: false
             referencedRelation: "v_general_ledger"
             referencedColumns: ["account_id"]
           },
@@ -217,6 +290,13 @@ export type Database = {
             foreignKeyName: "accounting_rule_settings_receivable_account_id_fkey"
             columns: ["receivable_account_id"]
             isOneToOne: false
+            referencedRelation: "v_equity_rollforward"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "accounting_rule_settings_receivable_account_id_fkey"
+            columns: ["receivable_account_id"]
+            isOneToOne: false
             referencedRelation: "v_general_ledger"
             referencedColumns: ["account_id"]
           },
@@ -246,6 +326,13 @@ export type Database = {
             columns: ["sales_account_id"]
             isOneToOne: false
             referencedRelation: "v_cash_bank_balance"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "accounting_rule_settings_sales_account_id_fkey"
+            columns: ["sales_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_equity_rollforward"
             referencedColumns: ["account_id"]
           },
           {
@@ -318,6 +405,42 @@ export type Database = {
           },
         ]
       }
+      audit_timeline: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          description: string | null
+          entity_id: string | null
+          entity_type: string
+          event_type: string
+          id: string
+          metadata: Json
+          unit_id: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          description?: string | null
+          entity_id?: string | null
+          entity_type: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          unit_id?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          unit_id?: string | null
+        }
+        Relationships: []
+      }
       business_units: {
         Row: {
           created_at: string
@@ -371,39 +494,189 @@ export type Database = {
       }
       cash_transactions: {
         Row: {
+          account_id: string | null
           created_at: string
           deskripsi: string | null
+          expense_account_id: string | null
+          from_account_id: string | null
           id: string
           jenis: string
           journal_entry_id: string | null
           jumlah: number
           kategori: string | null
+          nomor: string | null
+          payment_method: string | null
+          status: string | null
           tanggal: string
+          to_account_id: string | null
           unit_id: string
+          updated_at: string | null
         }
         Insert: {
+          account_id?: string | null
           created_at?: string
           deskripsi?: string | null
+          expense_account_id?: string | null
+          from_account_id?: string | null
           id?: string
           jenis: string
           journal_entry_id?: string | null
           jumlah?: number
           kategori?: string | null
+          nomor?: string | null
+          payment_method?: string | null
+          status?: string | null
           tanggal?: string
+          to_account_id?: string | null
           unit_id: string
+          updated_at?: string | null
         }
         Update: {
+          account_id?: string | null
           created_at?: string
           deskripsi?: string | null
+          expense_account_id?: string | null
+          from_account_id?: string | null
           id?: string
           jenis?: string
           journal_entry_id?: string | null
           jumlah?: number
           kategori?: string | null
+          nomor?: string | null
+          payment_method?: string | null
+          status?: string | null
           tanggal?: string
+          to_account_id?: string | null
           unit_id?: string
+          updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "cash_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_account_balances"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_cash_bank_balance"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_equity_rollforward"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_general_ledger"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_trial_balance"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_expense_account_id_fkey"
+            columns: ["expense_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_expense_account_id_fkey"
+            columns: ["expense_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_account_balances"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_expense_account_id_fkey"
+            columns: ["expense_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_cash_bank_balance"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_expense_account_id_fkey"
+            columns: ["expense_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_equity_rollforward"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_expense_account_id_fkey"
+            columns: ["expense_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_general_ledger"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_expense_account_id_fkey"
+            columns: ["expense_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_trial_balance"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_from_account_id_fkey"
+            columns: ["from_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_from_account_id_fkey"
+            columns: ["from_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_account_balances"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_from_account_id_fkey"
+            columns: ["from_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_cash_bank_balance"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_from_account_id_fkey"
+            columns: ["from_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_equity_rollforward"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_from_account_id_fkey"
+            columns: ["from_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_general_ledger"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_from_account_id_fkey"
+            columns: ["from_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_trial_balance"
+            referencedColumns: ["account_id"]
+          },
           {
             foreignKeyName: "cash_transactions_journal_entry_id_fkey"
             columns: ["journal_entry_id"]
@@ -417,6 +690,48 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_general_ledger"
             referencedColumns: ["journal_entry_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_to_account_id_fkey"
+            columns: ["to_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_to_account_id_fkey"
+            columns: ["to_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_account_balances"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_to_account_id_fkey"
+            columns: ["to_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_cash_bank_balance"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_to_account_id_fkey"
+            columns: ["to_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_equity_rollforward"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_to_account_id_fkey"
+            columns: ["to_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_general_ledger"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_to_account_id_fkey"
+            columns: ["to_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_trial_balance"
+            referencedColumns: ["account_id"]
           },
           {
             foreignKeyName: "cash_transactions_unit_id_fkey"
@@ -690,6 +1005,304 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      depreciation_runs: {
+        Row: {
+          created_at: string
+          id: string
+          journal_entry_id: string | null
+          period_month: number
+          period_year: number
+          posted_at: string | null
+          run_by: string | null
+          run_date: string
+          status: string
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          journal_entry_id?: string | null
+          period_month: number
+          period_year: number
+          posted_at?: string | null
+          run_by?: string | null
+          run_date?: string
+          status?: string
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          journal_entry_id?: string | null
+          period_month?: number
+          period_year?: number
+          posted_at?: string | null
+          run_by?: string | null
+          run_date?: string
+          status?: string
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "depreciation_runs_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "depreciation_runs_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "v_general_ledger"
+            referencedColumns: ["journal_entry_id"]
+          },
+          {
+            foreignKeyName: "depreciation_runs_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "business_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equity_closing_lines: {
+        Row: {
+          account_id: string
+          account_type: string
+          closing_amount: number
+          created_at: string
+          equity_closing_run_id: string
+          id: string
+        }
+        Insert: {
+          account_id: string
+          account_type: string
+          closing_amount: number
+          created_at?: string
+          equity_closing_run_id: string
+          id?: string
+        }
+        Update: {
+          account_id?: string
+          account_type?: string
+          closing_amount?: number
+          created_at?: string
+          equity_closing_run_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equity_closing_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equity_closing_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_account_balances"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "equity_closing_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_cash_bank_balance"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "equity_closing_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_equity_rollforward"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "equity_closing_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_general_ledger"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "equity_closing_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_trial_balance"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "equity_closing_lines_equity_closing_run_id_fkey"
+            columns: ["equity_closing_run_id"]
+            isOneToOne: false
+            referencedRelation: "equity_closing_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equity_closing_runs: {
+        Row: {
+          closed_by: string | null
+          closing_date: string
+          created_at: string
+          id: string
+          journal_entry_id: string | null
+          net_income: number
+          period_month: number
+          period_year: number
+          posted_at: string | null
+          status: string
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          closed_by?: string | null
+          closing_date: string
+          created_at?: string
+          id?: string
+          journal_entry_id?: string | null
+          net_income?: number
+          period_month: number
+          period_year: number
+          posted_at?: string | null
+          status?: string
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          closed_by?: string | null
+          closing_date?: string
+          created_at?: string
+          id?: string
+          journal_entry_id?: string | null
+          net_income?: number
+          period_month?: number
+          period_year?: number
+          posted_at?: string | null
+          status?: string
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equity_closing_runs_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equity_closing_runs_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "v_general_ledger"
+            referencedColumns: ["journal_entry_id"]
+          },
+          {
+            foreignKeyName: "equity_closing_runs_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "business_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fixed_asset_depreciation_lines: {
+        Row: {
+          accumulated_after: number
+          created_at: string
+          depreciation_amount: number
+          depreciation_run_id: string
+          fixed_asset_id: string
+          id: string
+        }
+        Insert: {
+          accumulated_after: number
+          created_at?: string
+          depreciation_amount: number
+          depreciation_run_id: string
+          fixed_asset_id: string
+          id?: string
+        }
+        Update: {
+          accumulated_after?: number
+          created_at?: string
+          depreciation_amount?: number
+          depreciation_run_id?: string
+          fixed_asset_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fixed_asset_depreciation_lines_depreciation_run_id_fkey"
+            columns: ["depreciation_run_id"]
+            isOneToOne: false
+            referencedRelation: "depreciation_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixed_asset_depreciation_lines_fixed_asset_id_fkey"
+            columns: ["fixed_asset_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fixed_assets: {
+        Row: {
+          accumulated_depreciation: number
+          acquisition_cost: number
+          acquisition_date: string
+          asset_code: string
+          asset_name: string
+          created_at: string
+          id: string
+          journal_entry_id: string | null
+          salvage_value: number
+          status: string
+          unit_id: string
+          updated_at: string
+          useful_life_months: number
+        }
+        Insert: {
+          accumulated_depreciation?: number
+          acquisition_cost: number
+          acquisition_date: string
+          asset_code: string
+          asset_name: string
+          created_at?: string
+          id?: string
+          journal_entry_id?: string | null
+          salvage_value?: number
+          status?: string
+          unit_id: string
+          updated_at?: string
+          useful_life_months: number
+        }
+        Update: {
+          accumulated_depreciation?: number
+          acquisition_cost?: number
+          acquisition_date?: string
+          asset_code?: string
+          asset_name?: string
+          created_at?: string
+          id?: string
+          journal_entry_id?: string | null
+          salvage_value?: number
+          status?: string
+          unit_id?: string
+          updated_at?: string
+          useful_life_months?: number
+        }
+        Relationships: []
       }
       goods_deliveries: {
         Row: {
@@ -1008,6 +1621,143 @@ export type Database = {
           },
         ]
       }
+      inventory_adjustment_lines: {
+        Row: {
+          created_at: string
+          id: string
+          inventory_adjustment_id: string
+          item_id: string
+          notes: string | null
+          qty: number
+          total_value: number | null
+          unit_cost: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory_adjustment_id: string
+          item_id: string
+          notes?: string | null
+          qty: number
+          total_value?: number | null
+          unit_cost: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory_adjustment_id?: string
+          item_id?: string
+          notes?: string | null
+          qty?: number
+          total_value?: number | null
+          unit_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_adjustment_lines_inventory_adjustment_id_fkey"
+            columns: ["inventory_adjustment_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_adjustments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_adjustment_lines_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_adjustment_lines_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "v_inventory_stock"
+            referencedColumns: ["item_id"]
+          },
+        ]
+      }
+      inventory_adjustments: {
+        Row: {
+          adjustment_date: string
+          adjustment_no: string
+          adjustment_type: string
+          approval_note: string | null
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          id: string
+          journal_entry_id: string | null
+          posted_at: string | null
+          posted_by: string | null
+          reason: string
+          requested_at: string | null
+          requested_by: string | null
+          status: string
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          adjustment_date: string
+          adjustment_no: string
+          adjustment_type: string
+          approval_note?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          journal_entry_id?: string | null
+          posted_at?: string | null
+          posted_by?: string | null
+          reason: string
+          requested_at?: string | null
+          requested_by?: string | null
+          status?: string
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          adjustment_date?: string
+          adjustment_no?: string
+          adjustment_type?: string
+          approval_note?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          journal_entry_id?: string | null
+          posted_at?: string | null
+          posted_by?: string | null
+          reason?: string
+          requested_at?: string | null
+          requested_by?: string | null
+          status?: string
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_adjustments_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_adjustments_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "v_general_ledger"
+            referencedColumns: ["journal_entry_id"]
+          },
+          {
+            foreignKeyName: "inventory_adjustments_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "business_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_items: {
         Row: {
           created_at: string
@@ -1019,6 +1769,7 @@ export type Database = {
           satuan: string
           stok_awal: number
           unit_id: string
+          updated_at: string
         }
         Insert: {
           created_at?: string
@@ -1030,6 +1781,7 @@ export type Database = {
           satuan?: string
           stok_awal?: number
           unit_id: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
@@ -1041,6 +1793,7 @@ export type Database = {
           satuan?: string
           stok_awal?: number
           unit_id?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1130,12 +1883,199 @@ export type Database = {
           },
         ]
       }
+      journal_correction_lines: {
+        Row: {
+          account_id: string
+          created_at: string
+          credit: number
+          debit: number
+          description: string | null
+          id: string
+          journal_correction_id: string
+          original_journal_entry_line_id: string | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          description?: string | null
+          id?: string
+          journal_correction_id: string
+          original_journal_entry_line_id?: string | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          description?: string | null
+          id?: string
+          journal_correction_id?: string
+          original_journal_entry_line_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_journal_correction_lines_account"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_journal_correction_lines_account"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_account_balances"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "fk_journal_correction_lines_account"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_cash_bank_balance"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "fk_journal_correction_lines_account"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_equity_rollforward"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "fk_journal_correction_lines_account"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_general_ledger"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "fk_journal_correction_lines_account"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_trial_balance"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "fk_journal_correction_lines_header"
+            columns: ["journal_correction_id"]
+            isOneToOne: false
+            referencedRelation: "journal_corrections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_journal_correction_lines_original_line"
+            columns: ["original_journal_entry_line_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entry_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_journal_correction_lines_original_line"
+            columns: ["original_journal_entry_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_general_ledger"
+            referencedColumns: ["journal_line_id"]
+          },
+        ]
+      }
+      journal_corrections: {
+        Row: {
+          approval_note: string | null
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          correction_date: string
+          correction_journal_entry_id: string | null
+          correction_type: string
+          created_at: string
+          id: string
+          original_journal_entry_id: string
+          reason: string
+          requested_at: string | null
+          requested_by: string | null
+          status: string
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          approval_note?: string | null
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          correction_date: string
+          correction_journal_entry_id?: string | null
+          correction_type: string
+          created_at?: string
+          id?: string
+          original_journal_entry_id: string
+          reason: string
+          requested_at?: string | null
+          requested_by?: string | null
+          status?: string
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          approval_note?: string | null
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          correction_date?: string
+          correction_journal_entry_id?: string | null
+          correction_type?: string
+          created_at?: string
+          id?: string
+          original_journal_entry_id?: string
+          reason?: string
+          requested_at?: string | null
+          requested_by?: string | null
+          status?: string
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_journal_corrections_correction"
+            columns: ["correction_journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_journal_corrections_correction"
+            columns: ["correction_journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "v_general_ledger"
+            referencedColumns: ["journal_entry_id"]
+          },
+          {
+            foreignKeyName: "fk_journal_corrections_original"
+            columns: ["original_journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_journal_corrections_original"
+            columns: ["original_journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "v_general_ledger"
+            referencedColumns: ["journal_entry_id"]
+          },
+        ]
+      }
       journal_entries: {
         Row: {
           created_at: string
           deskripsi: string | null
           id: string
           nomor: string | null
+          reversal_of: string | null
+          reversal_reason: string | null
+          reversed_at: string | null
+          reversed_by: string | null
           source_id: string | null
           source_type: string | null
           status: string
@@ -1147,6 +2087,10 @@ export type Database = {
           deskripsi?: string | null
           id?: string
           nomor?: string | null
+          reversal_of?: string | null
+          reversal_reason?: string | null
+          reversed_at?: string | null
+          reversed_by?: string | null
           source_id?: string | null
           source_type?: string | null
           status?: string
@@ -1158,6 +2102,10 @@ export type Database = {
           deskripsi?: string | null
           id?: string
           nomor?: string | null
+          reversal_of?: string | null
+          reversal_reason?: string | null
+          reversed_at?: string | null
+          reversed_by?: string | null
           source_id?: string | null
           source_type?: string | null
           status?: string
@@ -1228,6 +2176,13 @@ export type Database = {
             foreignKeyName: "journal_entry_lines_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
+            referencedRelation: "v_equity_rollforward"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "journal_entry_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
             referencedRelation: "v_general_ledger"
             referencedColumns: ["account_id"]
           },
@@ -1253,6 +2208,57 @@ export type Database = {
             referencedColumns: ["journal_entry_id"]
           },
         ]
+      }
+      journal_repair_log: {
+        Row: {
+          correction_entry_id: string | null
+          created_at: string | null
+          id: string
+          journal_entry_id: string | null
+          selisih: number | null
+          status: string | null
+        }
+        Insert: {
+          correction_entry_id?: string | null
+          created_at?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          selisih?: number | null
+          status?: string | null
+        }
+        Update: {
+          correction_entry_id?: string | null
+          created_at?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          selisih?: number | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      permissions: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -1288,6 +2294,199 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profit_sharing_account_mapping: {
+        Row: {
+          account_id: string
+          created_at: string | null
+          debit_credit_side: string
+          description: string | null
+          id: string
+          rule_id: string | null
+          unit_id: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string | null
+          debit_credit_side: string
+          description?: string | null
+          id?: string
+          rule_id?: string | null
+          unit_id: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string | null
+          debit_credit_side?: string
+          description?: string | null
+          id?: string
+          rule_id?: string | null
+          unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profit_sharing_account_mapping_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "profit_sharing_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profit_sharing_lines: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          liability_account_id: string | null
+          paid_amount: number | null
+          remaining_amount: number | null
+          rule_id: string
+          run_id: string
+          status: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          liability_account_id?: string | null
+          paid_amount?: number | null
+          remaining_amount?: number | null
+          rule_id: string
+          run_id: string
+          status?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          liability_account_id?: string | null
+          paid_amount?: number | null
+          remaining_amount?: number | null
+          rule_id?: string
+          run_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profit_sharing_lines_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "profit_sharing_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profit_sharing_lines_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "profit_sharing_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profit_sharing_payments: {
+        Row: {
+          amount: number
+          cash_transaction_id: string | null
+          created_at: string | null
+          id: string
+          journal_entry_id: string | null
+          line_id: string
+          payment_method: string | null
+        }
+        Insert: {
+          amount: number
+          cash_transaction_id?: string | null
+          created_at?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          line_id: string
+          payment_method?: string | null
+        }
+        Update: {
+          amount?: number
+          cash_transaction_id?: string | null
+          created_at?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          line_id?: string
+          payment_method?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profit_sharing_payments_line_id_fkey"
+            columns: ["line_id"]
+            isOneToOne: false
+            referencedRelation: "profit_sharing_lines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profit_sharing_rules: {
+        Row: {
+          account_id: string | null
+          created_at: string | null
+          distribution_type: string
+          id: string
+          is_active: boolean | null
+          name: string
+          percentage: number
+          unit_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          created_at?: string | null
+          distribution_type: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          percentage: number
+          unit_id: string
+        }
+        Update: {
+          account_id?: string | null
+          created_at?: string | null
+          distribution_type?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          percentage?: number
+          unit_id?: string
+        }
+        Relationships: []
+      }
+      profit_sharing_runs: {
+        Row: {
+          created_at: string | null
+          id: string
+          net_profit: number
+          period_month: number
+          period_year: number
+          source_equity_closing_id: string
+          status: string | null
+          unit_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          net_profit: number
+          period_month: number
+          period_year: number
+          source_equity_closing_id: string
+          status?: string | null
+          unit_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          net_profit?: number
+          period_month?: number
+          period_year?: number
+          source_equity_closing_id?: string
+          status?: string | null
+          unit_id?: string
+        }
+        Relationships: []
       }
       purchase_order_lines: {
         Row: {
@@ -1389,6 +2588,35 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "business_units"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission_code: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission_code: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission_code?: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_role_permissions_permission"
+            columns: ["permission_code"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["code"]
           },
         ]
       }
@@ -1922,6 +3150,69 @@ export type Database = {
         }
         Relationships: []
       }
+      unit_access_credentials: {
+        Row: {
+          access_status: string
+          created_at: string
+          email_virtual: string
+          generated_at: string
+          generated_by: string | null
+          id: string
+          last_password_reset_at: string | null
+          login_code: string
+          must_change_password: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          tenant_id: string
+          unit_id: string
+          user_id: string
+        }
+        Insert: {
+          access_status?: string
+          created_at?: string
+          email_virtual: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          last_password_reset_at?: string | null
+          login_code: string
+          must_change_password?: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          tenant_id: string
+          unit_id: string
+          user_id: string
+        }
+        Update: {
+          access_status?: string
+          created_at?: string
+          email_virtual?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          last_password_reset_at?: string | null
+          login_code?: string
+          must_change_password?: boolean
+          role?: Database["public"]["Enums"]["app_role"]
+          tenant_id?: string
+          unit_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unit_access_credentials_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "unit_access_credentials_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "business_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       unit_templates: {
         Row: {
           created_at: string
@@ -2077,6 +3368,42 @@ export type Database = {
           },
         ]
       }
+      v_audit_timeline: {
+        Row: {
+          actor_id: string | null
+          created_at: string | null
+          description: string | null
+          entity_id: string | null
+          entity_type: string | null
+          event_type: string | null
+          id: string | null
+          metadata: Json | null
+          unit_id: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type?: string | null
+          id?: string | null
+          metadata?: Json | null
+          unit_id?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type?: string | null
+          id?: string | null
+          metadata?: Json | null
+          unit_id?: string | null
+        }
+        Relationships: []
+      }
       v_balance_sheet: {
         Row: {
           account_code: string | null
@@ -2118,6 +3445,25 @@ export type Database = {
           },
         ]
       }
+      v_equity_rollforward: {
+        Row: {
+          account_id: string | null
+          equity_balance: number | null
+          kode: string | null
+          nama: string | null
+          tipe: Database["public"]["Enums"]["coa_tipe"] | null
+          unit_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "business_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_general_ledger: {
         Row: {
           account_code: string | null
@@ -2133,6 +3479,13 @@ export type Database = {
           journal_line_id: string | null
           line_description: string | null
           nomor: string | null
+          reversal_of: string | null
+          reversal_reason: string | null
+          reversed_at: string | null
+          reversed_by: string | null
+          source_id: string | null
+          source_type: string | null
+          status: string | null
           tanggal: string | null
           unit_id: string | null
         }
@@ -2154,6 +3507,43 @@ export type Database = {
           beban: number | null
           laba_rugi_effect: number | null
           pendapatan: number | null
+          unit_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "business_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_income_statement_open: {
+        Row: {
+          account_code: string | null
+          account_name: string | null
+          account_type: Database["public"]["Enums"]["coa_tipe"] | null
+          beban: number | null
+          laba_rugi_effect: number | null
+          pendapatan: number | null
+          unit_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "business_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_income_statement_summary: {
+        Row: {
+          laba_bersih: number | null
+          total_beban: number | null
+          total_pendapatan: number | null
           unit_id: string | null
         }
         Relationships: [
@@ -2194,8 +3584,17 @@ export type Database = {
           tipe: string | null
           total_credit: number | null
           total_debit: number | null
+          unit_id: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "business_units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       v_trial_balance: {
         Row: {
@@ -2220,9 +3619,34 @@ export type Database = {
       }
     }
     Functions: {
+      approve_inventory_adjustment: {
+        Args: { p_approval_note?: string; p_inventory_adjustment_id: string }
+        Returns: string
+      }
+      approve_journal_correction: {
+        Args: { p_approval_note?: string; p_journal_correction_id: string }
+        Returns: string
+      }
       approve_tenant_registration: {
         Args: { _registration_id: string }
         Returns: Json
+      }
+      assert_period_open: {
+        Args: { p_transaction_date: string; p_unit_id: string }
+        Returns: undefined
+      }
+      assert_user_has_permission: {
+        Args: {
+          p_permission_code: string
+          p_unit_id: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      auto_journal_repair_engine: { Args: never; Returns: undefined }
+      calculate_profit_sharing: {
+        Args: { p_run_id: string }
+        Returns: undefined
       }
       can_access_unit: {
         Args: { _unit_id: string; _user_id: string }
@@ -2232,9 +3656,80 @@ export type Database = {
         Args: { _tenant_id: string; _user_id: string }
         Returns: boolean
       }
+      close_accounting_period: {
+        Args: {
+          p_closing_note?: string
+          p_period_month: number
+          p_period_year: number
+          p_unit_id: string
+        }
+        Returns: string
+      }
+      create_business_unit_core: {
+        Args: {
+          _jenis_unit: string
+          _kode_unit: string
+          _nama_unit: string
+          _template_id: string
+          _tenant_id: string
+        }
+        Returns: string
+      }
+      create_business_unit_with_manager: {
+        Args: {
+          _generated_by?: string
+          _jenis_unit: string
+          _kode_unit: string
+          _manager_user_id: string
+          _nama_unit: string
+          _template_id: string
+          _tenant_id: string
+        }
+        Returns: {
+          access_status: string
+          credential_id: string
+          email_virtual: string
+          login_code: string
+          role: Database["public"]["Enums"]["app_role"]
+          unit_id: string
+        }[]
+      }
       generate_accounting_rules_for_unit: {
         Args: { p_unit_id: string }
         Returns: undefined
+      }
+      generate_equity_closing_run: {
+        Args: { p_month: number; p_unit_id: string; p_year: number }
+        Returns: string
+      }
+      generate_profit_sharing_journal: {
+        Args: { p_run_id: string }
+        Returns: undefined
+      }
+      generate_unit_login_code: {
+        Args: { _tenant_id: string; _unit_name: string }
+        Returns: string
+      }
+      generate_unit_virtual_email: {
+        Args: { _tenant_id: string; _unit_name: string }
+        Returns: string
+      }
+      get_user_login_context: {
+        Args: { _user_id: string }
+        Returns: {
+          redirect_path: string
+          role: Database["public"]["Enums"]["app_role"]
+          tenant_id: string
+          unit_id: string
+        }[]
+      }
+      has_permission: {
+        Args: {
+          p_permission_code: string
+          p_unit_id: string
+          p_user_id: string
+        }
+        Returns: boolean
       }
       has_role: {
         Args: {
@@ -2243,12 +3738,57 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_period_closed: {
+        Args: { p_transaction_date: string; p_unit_id: string }
+        Returns: boolean
+      }
       is_super_admin_platform: { Args: { _user_id: string }; Returns: boolean }
       is_tenant_member: {
         Args: { _tenant_id: string; _user_id: string }
         Returns: boolean
       }
+      log_audit_event: {
+        Args: {
+          p_actor_id: string
+          p_after_state?: Json
+          p_before_state?: Json
+          p_entity_id: string
+          p_entity_type: string
+          p_event_type: string
+          p_metadata?: Json
+          p_unit_id: string
+        }
+        Returns: undefined
+      }
+      pay_profit_sharing: {
+        Args: { p_amount: number; p_line_id: string; p_method: string }
+        Returns: undefined
+      }
+      post_account_reclassification_correction: {
+        Args: { p_journal_correction_id: string }
+        Returns: string
+      }
+      post_capital_contribution: {
+        Args: { p_cash_transaction_id: string }
+        Returns: string
+      }
+      post_cash_bank_transfer: {
+        Args: { p_cash_transaction_id: string }
+        Returns: string
+      }
       post_customer_payment: { Args: { p_payment_id: string }; Returns: string }
+      post_equity_closing: {
+        Args: {
+          p_period_month: number
+          p_period_year: number
+          p_unit_id: string
+        }
+        Returns: string
+      }
+      post_full_reversal_correction: {
+        Args: { p_journal_correction_id: string }
+        Returns: string
+      }
       post_goods_delivery: {
         Args: { p_goods_delivery_id: string }
         Returns: string
@@ -2256,6 +3796,40 @@ export type Database = {
       post_goods_receipt: {
         Args: { p_goods_receipt_id: string }
         Returns: string
+      }
+      post_inventory_adjustment: {
+        Args: { p_inventory_adjustment_id: string }
+        Returns: string
+      }
+      post_monthly_depreciation: {
+        Args: {
+          p_period_month: number
+          p_period_year: number
+          p_unit_id: string
+        }
+        Returns: string
+      }
+      post_nominal_adjustment_correction: {
+        Args: { p_journal_correction_id: string }
+        Returns: string
+      }
+      post_operational_expense: {
+        Args: { p_cash_transaction_id: string }
+        Returns: string
+      }
+      post_profit_sharing: { Args: { p_run_id: string }; Returns: undefined }
+      post_quick_cash_sale: {
+        Args: {
+          p_customer_id: string
+          p_harga_jual: number
+          p_harga_pokok: number
+          p_item_id: string
+          p_payment_method?: string
+          p_qty: number
+          p_tanggal?: string
+          p_unit_id: string
+        }
+        Returns: Json
       }
       post_sales_invoice: {
         Args: { p_sales_invoice_id: string }
@@ -2265,11 +3839,74 @@ export type Database = {
         Args: { p_supplier_payment_id: string }
         Returns: string
       }
+      register_unit_access_credential: {
+        Args: {
+          _email_virtual: string
+          _generated_by?: string
+          _login_code: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _tenant_id: string
+          _unit_id: string
+          _user_id: string
+        }
+        Returns: string
+      }
+      reject_inventory_adjustment: {
+        Args: { p_inventory_adjustment_id: string; p_rejection_note: string }
+        Returns: string
+      }
+      reject_journal_correction: {
+        Args: { p_journal_correction_id: string; p_rejection_note: string }
+        Returns: string
+      }
       reject_tenant_registration: {
         Args: { _reason: string; _registration_id: string }
         Returns: undefined
       }
+      reopen_accounting_period: {
+        Args: {
+          p_period_month: number
+          p_period_year: number
+          p_reopen_note?: string
+          p_unit_id: string
+        }
+        Returns: string
+      }
+      request_inventory_adjustment_approval: {
+        Args: { p_inventory_adjustment_id: string }
+        Returns: string
+      }
+      request_journal_correction_approval: {
+        Args: { p_journal_correction_id: string }
+        Returns: string
+      }
+      run_core_profit_sharing_orchestrator: {
+        Args: { p_equity_closing_id: string }
+        Returns: undefined
+      }
+      run_year_end_equity_closing: {
+        Args: { p_unit_id: string; p_year: number }
+        Returns: string
+      }
       unit_tenant_id: { Args: { _unit_id: string }; Returns: string }
+      update_inventory_item_master: {
+        Args: {
+          p_harga_beli: number
+          p_harga_jual: number
+          p_item_id: string
+          p_nama_barang: string
+          p_satuan: string
+        }
+        Returns: undefined
+      }
+      validate_journal_correction_balance: {
+        Args: { p_journal_correction_id: string }
+        Returns: undefined
+      }
+      validate_no_inventory_account_in_journal_correction: {
+        Args: { p_journal_correction_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       account_type:
@@ -2284,6 +3921,8 @@ export type Database = {
         | "direktur_bumdes"
         | "admin_bumdes"
         | "manager_unit"
+        | "operator_unit"
+        | "viewer_unit"
       coa_tipe: "aset" | "kewajiban" | "ekuitas" | "pendapatan" | "beban"
       registration_status: "pending" | "approved" | "rejected"
       tenant_status: "pending" | "active" | "suspended"
@@ -2428,6 +4067,8 @@ export const Constants = {
         "direktur_bumdes",
         "admin_bumdes",
         "manager_unit",
+        "operator_unit",
+        "viewer_unit",
       ],
       coa_tipe: ["aset", "kewajiban", "ekuitas", "pendapatan", "beban"],
       registration_status: ["pending", "approved", "rejected"],
