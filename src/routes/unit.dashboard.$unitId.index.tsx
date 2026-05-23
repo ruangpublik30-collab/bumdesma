@@ -8,16 +8,25 @@ export const Route = createFileRoute("/unit/dashboard/$unitId/")({
   component: UnitDashboardOverview,
 });
 
-function Stat({ label, value, icon: Icon, tone = "default" }: { label: string; value: string; icon: any; tone?: "default" | "accent" }) {
+type Tone = "green" | "blue" | "orange" | "violet";
+const toneMap: Record<Tone, { iconBg: string; iconColor: string }> = {
+  green:  { iconBg: "bg-[#DCFCE7]", iconColor: "text-[#16A34A]" },
+  blue:   { iconBg: "bg-[#DBEAFE]", iconColor: "text-[#2563EB]" },
+  orange: { iconBg: "bg-[#FED7AA]", iconColor: "text-[#F97316]" },
+  violet: { iconBg: "bg-[#EDE9FE]", iconColor: "text-[#7C3AED]" },
+};
+
+function Stat({ label, value, icon: Icon, tone = "green" }: { label: string; value: string; icon: any; tone?: Tone }) {
+  const t = toneMap[tone];
   return (
-    <div className="rounded-lg border bg-card p-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="text-xs text-muted-foreground uppercase tracking-wider">{label}</div>
-          <div className="mt-2 font-display text-xl font-bold">{value}</div>
+    <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="text-[12px] text-[#6B7280] uppercase tracking-wide font-semibold">{label}</div>
+          <div className="mt-2 font-display text-[22px] md:text-[24px] font-bold text-[#111827] truncate">{value}</div>
         </div>
-        <div className={`h-10 w-10 rounded-md grid place-items-center ${tone === "accent" ? "bg-accent text-accent-foreground" : "bg-primary/10 text-primary"}`}>
-          <Icon className="h-5 w-5" />
+        <div className={`h-11 w-11 rounded-xl grid place-items-center ${t.iconBg}`}>
+          <Icon className={`h-5 w-5 ${t.iconColor}`} />
         </div>
       </div>
     </div>
