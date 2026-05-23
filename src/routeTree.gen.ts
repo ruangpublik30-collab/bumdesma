@@ -24,6 +24,8 @@ import { Route as LaporanNeracaRouteImport } from './routes/laporan.neraca'
 import { Route as LaporanLabaRugiRouteImport } from './routes/laporan.laba-rugi'
 import { Route as LaporanKonsolidasiRouteImport } from './routes/laporan.konsolidasi'
 import { Route as LaporanArusKasRouteImport } from './routes/laporan.arus-kas'
+import { Route as UnitDashboardUnitIdRouteImport } from './routes/unit.dashboard.$unitId'
+import { Route as UnitDashboardUnitIdIndexRouteImport } from './routes/unit.dashboard.$unitId.index'
 
 const UnitsRoute = UnitsRouteImport.update({
   id: '/units',
@@ -100,6 +102,17 @@ const LaporanArusKasRoute = LaporanArusKasRouteImport.update({
   path: '/laporan/arus-kas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UnitDashboardUnitIdRoute = UnitDashboardUnitIdRouteImport.update({
+  id: '/unit/dashboard/$unitId',
+  path: '/unit/dashboard/$unitId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UnitDashboardUnitIdIndexRoute =
+  UnitDashboardUnitIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => UnitDashboardUnitIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,6 +130,8 @@ export interface FileRoutesByFullPath {
   '/laporan/neraca': typeof LaporanNeracaRoute
   '/platform/bumdes': typeof PlatformBumdesRoute
   '/platform/pendaftaran': typeof PlatformPendaftaranRoute
+  '/unit/dashboard/$unitId': typeof UnitDashboardUnitIdRouteWithChildren
+  '/unit/dashboard/$unitId/': typeof UnitDashboardUnitIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -134,6 +149,7 @@ export interface FileRoutesByTo {
   '/laporan/neraca': typeof LaporanNeracaRoute
   '/platform/bumdes': typeof PlatformBumdesRoute
   '/platform/pendaftaran': typeof PlatformPendaftaranRoute
+  '/unit/dashboard/$unitId': typeof UnitDashboardUnitIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,6 +168,8 @@ export interface FileRoutesById {
   '/laporan/neraca': typeof LaporanNeracaRoute
   '/platform/bumdes': typeof PlatformBumdesRoute
   '/platform/pendaftaran': typeof PlatformPendaftaranRoute
+  '/unit/dashboard/$unitId': typeof UnitDashboardUnitIdRouteWithChildren
+  '/unit/dashboard/$unitId/': typeof UnitDashboardUnitIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +189,8 @@ export interface FileRouteTypes {
     | '/laporan/neraca'
     | '/platform/bumdes'
     | '/platform/pendaftaran'
+    | '/unit/dashboard/$unitId'
+    | '/unit/dashboard/$unitId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -188,6 +208,7 @@ export interface FileRouteTypes {
     | '/laporan/neraca'
     | '/platform/bumdes'
     | '/platform/pendaftaran'
+    | '/unit/dashboard/$unitId'
   id:
     | '__root__'
     | '/'
@@ -205,6 +226,8 @@ export interface FileRouteTypes {
     | '/laporan/neraca'
     | '/platform/bumdes'
     | '/platform/pendaftaran'
+    | '/unit/dashboard/$unitId'
+    | '/unit/dashboard/$unitId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -223,6 +246,7 @@ export interface RootRouteChildren {
   LaporanNeracaRoute: typeof LaporanNeracaRoute
   PlatformBumdesRoute: typeof PlatformBumdesRoute
   PlatformPendaftaranRoute: typeof PlatformPendaftaranRoute
+  UnitDashboardUnitIdRoute: typeof UnitDashboardUnitIdRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -332,8 +356,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LaporanArusKasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/unit/dashboard/$unitId': {
+      id: '/unit/dashboard/$unitId'
+      path: '/unit/dashboard/$unitId'
+      fullPath: '/unit/dashboard/$unitId'
+      preLoaderRoute: typeof UnitDashboardUnitIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/unit/dashboard/$unitId/': {
+      id: '/unit/dashboard/$unitId/'
+      path: '/'
+      fullPath: '/unit/dashboard/$unitId/'
+      preLoaderRoute: typeof UnitDashboardUnitIdIndexRouteImport
+      parentRoute: typeof UnitDashboardUnitIdRoute
+    }
   }
 }
+
+interface UnitDashboardUnitIdRouteChildren {
+  UnitDashboardUnitIdIndexRoute: typeof UnitDashboardUnitIdIndexRoute
+}
+
+const UnitDashboardUnitIdRouteChildren: UnitDashboardUnitIdRouteChildren = {
+  UnitDashboardUnitIdIndexRoute: UnitDashboardUnitIdIndexRoute,
+}
+
+const UnitDashboardUnitIdRouteWithChildren =
+  UnitDashboardUnitIdRoute._addFileChildren(UnitDashboardUnitIdRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -351,7 +400,18 @@ const rootRouteChildren: RootRouteChildren = {
   LaporanNeracaRoute: LaporanNeracaRoute,
   PlatformBumdesRoute: PlatformBumdesRoute,
   PlatformPendaftaranRoute: PlatformPendaftaranRoute,
+  UnitDashboardUnitIdRoute: UnitDashboardUnitIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
