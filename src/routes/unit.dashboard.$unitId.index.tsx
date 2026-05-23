@@ -65,23 +65,23 @@ function UnitDashboardOverview() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold">Ringkasan Unit</h2>
-        <p className="text-sm text-muted-foreground">Data difilter otomatis berdasarkan unit ini.</p>
+        <h2 className="font-display text-[22px] md:text-[24px] font-bold text-[#111827]">Ringkasan Unit</h2>
+        <p className="text-[14px] text-[#6B7280]">Data difilter otomatis berdasarkan unit ini.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Stat label="Total Penjualan" value={formatIDR(data?.total_penjualan ?? 0)} icon={ShoppingCart} tone="accent" />
-        <Stat label="Piutang" value={formatIDR(data?.piutang ?? 0)} icon={Receipt} />
-        <Stat label="Persediaan" value={formatIDR(data?.persediaan ?? 0)} icon={Package} />
-        <Stat label="Kas & Bank" value={formatIDR(data?.kas_bank ?? 0)} icon={Wallet} />
-        <Stat label="Hutang Supplier" value={formatIDR(data?.hutang ?? 0)} icon={FileText} />
-        <Stat label="Laba Bersih" value={formatIDR(data?.laba ?? 0)} icon={TrendingUp} tone="accent" />
+        <Stat label="Total Penjualan" value={formatIDR(data?.total_penjualan ?? 0)} icon={ShoppingCart} tone="green" />
+        <Stat label="Piutang" value={formatIDR(data?.piutang ?? 0)} icon={Receipt} tone="blue" />
+        <Stat label="Persediaan" value={formatIDR(data?.persediaan ?? 0)} icon={Package} tone="violet" />
+        <Stat label="Kas & Bank" value={formatIDR(data?.kas_bank ?? 0)} icon={Wallet} tone="green" />
+        <Stat label="Hutang Supplier" value={formatIDR(data?.hutang ?? 0)} icon={FileText} tone="blue" />
+        <Stat label="Laba Bersih" value={formatIDR(data?.laba ?? 0)} icon={TrendingUp} tone="orange" />
       </div>
 
-      <div className="rounded-lg border bg-card p-5 text-sm text-muted-foreground">
+      <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 text-[14px] text-[#6B7280] shadow-sm">
         Gunakan menu di sidebar untuk membuka modul operasional unit ini. Setiap modul terhubung
         langsung dengan engine database (jurnal, persediaan, piutang, hutang) dan sudah difilter
-        berdasarkan <span className="font-mono text-foreground">unit_id</span>.
+        berdasarkan <span className="font-mono text-[#111827] font-semibold">unit_id</span>.
       </div>
     </div>
   );
