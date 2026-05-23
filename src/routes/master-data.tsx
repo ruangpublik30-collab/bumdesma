@@ -49,7 +49,7 @@ function MasterPage() {
   const u = useUnitPicker();
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:flex-wrap min-w-0">
         <div>
           <h2 className="font-display text-2xl font-bold">Master Data</h2>
           <p className="text-sm text-muted-foreground">Kelola pelanggan, pemasok, dan barang per unit usaha.</p>
