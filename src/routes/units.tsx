@@ -117,71 +117,9 @@ function UnitsPage() {
             Kelola unit usaha BUMDes. Saat unit dibuat, sistem otomatis menyiapkan dashboard unit dan kredensial akses manager unit.
           </p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-1" /> Tambah Unit</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Tambah Unit Usaha</DialogTitle>
-              <DialogDescription>
-                Backend akan otomatis menyiapkan COA, accounting rules, role manager, login code, dan email virtual.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={submit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>Kode Unit</Label>
-                  <Input required value={form.kode_unit} onChange={(e) => setForm({ ...form, kode_unit: e.target.value.toUpperCase() })} placeholder="DGG" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Nama Unit</Label>
-                  <Input required value={form.nama_unit} onChange={(e) => setForm({ ...form, nama_unit: e.target.value })} placeholder="Unit Dagang Sembako" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Jenis Unit</Label>
-                <Select value={form.jenis_unit} onValueChange={(v) => setForm({ ...form, jenis_unit: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {JENIS_OPTIONS.map((j) => <SelectItem key={j} value={j}>{j}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Template Unit</Label>
-                <Select value={form.template_id} onValueChange={(v) => setForm({ ...form, template_id: v })}>
-                  <SelectTrigger><SelectValue placeholder="Pilih template…" /></SelectTrigger>
-                  <SelectContent>
-                    {(templates ?? []).map((t: any) => (
-                      <SelectItem key={t.id} value={t.id}>{t.nama_template} ({t.kode_template})</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">Menentukan COA, accounting rules, dan sidebar dashboard unit.</p>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Manager Unit</Label>
-                <Select value={form.manager_user_id} onValueChange={(v) => setForm({ ...form, manager_user_id: v })}>
-                  <SelectTrigger><SelectValue placeholder="Pilih manager…" /></SelectTrigger>
-                  <SelectContent>
-                    {(managers ?? []).map((m: any) => (
-                      <SelectItem key={m.id} value={m.id}>{m.full_name || m.id.slice(0, 8)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">User ini akan diberi role manager_unit & kredensial login otomatis.</p>
-              </div>
-
-              <DialogFooter>
-                <Button type="submit" disabled={busy}>{busy ? "Menyimpan…" : "Buat Unit"}</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={() => nav({ to: "/bumdes/dashboard/units/create" })}>
+          <Plus className="h-4 w-4 mr-1" /> Tambah Unit
+        </Button>
       </div>
 
       <div className="rounded-lg border bg-card overflow-hidden">
