@@ -161,9 +161,9 @@ export function UnitShell({ unitId, children }: { unitId: string; children: Reac
   const onSignOut = async () => { await signOut(); router.navigate({ to: "/login" }); };
 
   return (
-    <div className="min-h-screen bg-[#F8FAF7]">
+    <div className="min-h-screen bg-[#F8FAF7] overflow-x-hidden">
       {/* Sidebar — desktop fixed */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-[260px] no-print">
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-[260px] h-screen overflow-y-auto no-print">
         <SidebarBody
           items={items}
           data={data}
@@ -177,7 +177,7 @@ export function UnitShell({ unitId, children }: { unitId: string; children: Reac
 
       {/* Mobile drawer */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="p-0 w-[280px] border-r-0 bg-transparent">
+        <SheetContent side="left" className="p-0 w-[280px] max-w-[85vw] border-r-0 bg-transparent">
           <SidebarBody
             items={items}
             data={data}
@@ -192,25 +192,23 @@ export function UnitShell({ unitId, children }: { unitId: string; children: Reac
       </Sheet>
 
       {/* Topbar — fixed */}
-      <header className="fixed top-0 right-0 left-0 md:left-[260px] z-30 bg-white border-b border-[#E5E7EB] shadow-[0_1px_2px_rgba(0,0,0,0.04)] no-print">
-        <div className="h-[72px] px-4 md:px-8 flex items-center gap-3">
-          {/* Hamburger mobile */}
+      <header className="fixed top-0 right-0 left-0 lg:left-[260px] z-30 bg-white border-b border-[#E5E7EB] shadow-[0_1px_2px_rgba(0,0,0,0.04)] no-print">
+        <div className="h-[72px] px-4 sm:px-5 lg:px-8 flex items-center gap-3 w-full min-w-0">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
-              <button className="md:hidden h-10 w-10 grid place-items-center rounded-lg hover:bg-[#F3F4F6] text-[#374151]">
+              <button className="shrink-0 lg:hidden h-10 w-10 grid place-items-center rounded-lg hover:bg-[#F3F4F6] text-[#374151]">
                 <Menu className="h-5 w-5" />
               </button>
             </SheetTrigger>
           </Sheet>
 
           <div className="min-w-0 flex-1">
-            <h1 className="font-display text-[18px] md:text-[20px] font-bold text-[#111827] truncate">
+            <h1 className="font-display text-[16px] sm:text-[18px] lg:text-[20px] font-bold text-[#111827] truncate">
               {data?.unit?.nama_unit ?? "Memuat unit…"}
             </h1>
-            <p className="text-[12px] md:text-[13px] text-[#6B7280] truncate">
+            <p className="text-[12px] lg:text-[13px] text-[#6B7280] truncate">
               {data?.tenant?.nama_bumdes ?? ""}
-              {data?.unit && ` · Jenis: ${data.unit.jenis_unit}`}
-              {data?.template && ` · Template: ${data.template.nama_template}`}
+              {data?.unit && ` · ${data.unit.jenis_unit}`}
             </p>
           </div>
 
@@ -223,6 +221,7 @@ export function UnitShell({ unitId, children }: { unitId: string; children: Reac
                   : "bg-[#F3F4F6] text-[#374151] border-[#E5E7EB] hover:bg-[#F3F4F6]"
               )}
             >
+
               {data.unit.status}
             </Badge>
           )}
