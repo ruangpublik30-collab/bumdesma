@@ -80,10 +80,10 @@ function useUnitAccounts(unitId: string, enabled: boolean, filter?: (a: any) => 
     queryFn: async () => {
       const { data } = await supabase
         .from("chart_of_accounts")
-        .select("id, kode, nama, account_type, account_category")
+        .select("id, kode, nama, tipe")
         .eq("unit_id", unitId)
         .order("kode");
-      return (data ?? []).filter(filter ?? (() => true));
+      return ((data ?? []) as any[]).filter(filter ?? (() => true));
     },
   });
 }
