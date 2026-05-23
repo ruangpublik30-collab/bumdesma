@@ -105,7 +105,7 @@ function QuickCashSaleDialog({ unitId, onSuccess }: { unitId: string; onSuccess:
     mutationFn: async () => {
       const { error } = await supabase.rpc("post_quick_cash_sale", {
         p_unit_id: unitId,
-        p_customer_id: f.customer_id || null,
+        p_customer_id: (f.customer_id || null) as unknown as string,
         p_item_id: f.item_id,
         p_qty: Number(f.qty),
         p_harga_jual: Number(f.harga_jual),
