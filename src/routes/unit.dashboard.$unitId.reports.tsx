@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatIDR } from "@/lib/format";
+import { ReportShell } from "@/components/reports/report-shell";
+import { NeracaStaffel, BSRow } from "@/components/reports/neraca-staffel";
 
 export const Route = createFileRoute("/unit/dashboard/$unitId/reports")({
   component: ReportsPage,
@@ -13,48 +15,63 @@ function ReportsPage() {
   const { data } = useQuery({
     queryKey: ["unit-reports", unitId],
     queryFn: async () => {
-      const [pnl, bs, tb] = await Promise.all([
+      const [pnl, bs, tb, unit] = await Promise.all([
         supabase.from("v_income_statement_summary").select("*").eq("unit_id", unitId).maybeSingle(),
-        supabase.from("v_balance_sheet").select("*").eq("unit_id", unitId),
+        supabase.from("v_balance_sheet").select("*").eq("unit_id", unitId).order("account_code"),
         supabase.from("v_trial_balance").select("*").eq("unit_id", unitId).order("account_code"),
+        supabase
+          .from("business_units")
+          .select("nama_unit, tenant:tenants(nama_bumdes, nama_desa, nama_kecamatan)")
+          .eq("id", unitId)
+          .maybeSingle(),
       ]);
-      const bsRows = (bs.data ?? []) as any[];
       return {
         pnl: pnl.data as any,
-        bs: {
-          aset: bsRows.reduce((s, r) => s + Number(r.aset ?? 0), 0),
-          kewajiban: bsRows.reduce((s, r) => s + Number(r.kewajiban ?? 0), 0),
-          ekuitas: bsRows.reduce((s, r) => s + Number(r.ekuitas ?? 0), 0),
-          rows: bsRows,
-        },
+        bsRows: (bs.data ?? []) as BSRow[],
         tb: (tb.data ?? []) as any[],
+        unit: unit.data as any,
       };
     },
   });
 
   const pnl = data?.pnl;
-  const bs = data?.bs;
+  const unit = data?.unit;
+  const bumdes = {
+    nama_bumdes: unit?.tenant?.nama_bumdes,
+    nama_desa: unit?.tenant?.nama_desa,
+    nama_kecamatan: unit?.tenant?.nama_kecamatan,
+    nama_unit: unit?.nama_unit,
+  };
+  const today = new Intl.DateTimeFormat("id-ID", { dateStyle: "long" }).format(new Date());
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="no-print">
         <h2 className="font-display text-2xl font-bold">Laporan Unit</h2>
-        <p className="text-sm text-muted-foreground">Ringkasan laporan keuangan unit langsung dari engine (view database).</p>
+        <p className="text-sm text-muted-foreground">
+          Template laporan resmi BUMDes — siap cetak / export PDF (A4).
+        </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="grid md:grid-cols-3 gap-4 no-print">
         <Card title="Pendapatan" value={formatIDR(Number(pnl?.total_pendapatan ?? 0))} />
         <Card title="Beban" value={formatIDR(Number(pnl?.total_beban ?? 0))} />
         <Card title="Laba Bersih" value={formatIDR(Number(pnl?.laba_bersih ?? 0))} highlight />
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4">
-        <Card title="Aset" value={formatIDR(Number(bs?.aset ?? 0))} />
-        <Card title="Kewajiban" value={formatIDR(Number(bs?.kewajiban ?? 0))} />
-        <Card title="Ekuitas" value={formatIDR(Number(bs?.ekuitas ?? 0))} />
-      </div>
+      <ReportShell
+        title="Laporan Neraca"
+        subtitle="Bentuk Staffel"
+        bumdes={bumdes}
+        periodLabel={`Per tanggal ${today}`}
+      >
+        <NeracaStaffel
+          rows={data?.bsRows ?? []}
+          labaBerjalan={Number(pnl?.laba_bersih ?? 0)}
+        />
+      </ReportShell>
 
-      <div>
+      <div className="no-print">
         <h3 className="font-display text-lg font-semibold mb-2">Neraca Saldo</h3>
         <div className="rounded-lg border bg-card overflow-hidden">
           <table className="w-full text-sm">
