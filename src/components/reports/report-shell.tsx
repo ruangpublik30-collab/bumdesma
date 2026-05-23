@@ -1,6 +1,6 @@
-import { ReactNode } from "react";
+import { ReactNode, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Printer, Download } from "lucide-react";
+import { Printer, Download, Loader2 } from "lucide-react";
 
 interface BumdesInfo {
   nama_bumdes?: string | null;
@@ -20,25 +20,62 @@ interface Props {
 const formatTanggalID = () =>
   new Intl.DateTimeFormat("id-ID", { dateStyle: "long" }).format(new Date());
 
+const slugify = (s: string) =>
+  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
 /**
- * Template laporan resmi BUMDes — A4, print-to-PDF ready.
- * Reusable untuk Neraca, Laba Rugi, Arus Kas, dll.
+ * Template laporan resmi BUMDes — A4, generate PDF via html2pdf.js.
+ * Tombol "Export PDF" mengunduh file .pdf langsung (bukan dialog cetak).
  */
 export function ReportShell({ title, subtitle, bumdes, periodLabel, children }: Props) {
   const cetakTanggal = formatTanggalID();
+  const printRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportPdf = async () => {
+    if (!printRef.current || exporting) return;
+    setExporting(true);
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      const filename = `${slugify(title)}-${slugify(bumdes.nama_bumdes ?? "bumdes")}-${Date.now()}.pdf`;
+      const opts = {
+        margin: 0,
+        filename,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["css", "legacy"] },
+      };
+      // @ts-expect-error html2pdf types are incomplete for pagebreak
+      await html2pdf().set(opts).from(printRef.current).save();
+    } catch (err) {
+      console.error("Export PDF gagal:", err);
+      alert("Export PDF gagal. Silakan coba lagi.");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end gap-2 no-print">
         <Button variant="outline" size="sm" onClick={() => window.print()}>
           <Printer className="h-4 w-4 mr-2" /> Cetak
         </Button>
-        <Button size="sm" onClick={() => window.print()}>
-          <Download className="h-4 w-4 mr-2" /> Export PDF
+        <Button size="sm" onClick={handleExportPdf} disabled={exporting}>
+          {exporting ? (
+            <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Memproses…</>
+          ) : (
+            <><Download className="h-4 w-4 mr-2" /> Export PDF</>
+          )}
         </Button>
       </div>
 
-      <div className="print-area mx-auto bg-white text-[#1e3a8a] rounded-lg border shadow-sm"
-           style={{ maxWidth: "210mm", padding: "16mm 14mm" }}>
+      <div
+        ref={printRef}
+        className="print-area mx-auto bg-white text-[#1e3a8a] rounded-lg border shadow-sm"
+        style={{ maxWidth: "210mm", padding: "16mm 14mm" }}
+      >
         {/* HEADER — Identitas BUMDes */}
         <div className="border-2 border-[#1e3a8a] rounded-md text-center py-4 px-4 mb-4">
           <div className="text-xs uppercase tracking-widest text-[#1e3a8a]/70">
