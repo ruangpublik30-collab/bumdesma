@@ -3675,6 +3675,29 @@ export type Database = {
         }
         Returns: string
       }
+      create_business_unit_with_auth_manager: {
+        Args: {
+          _generated_by?: string
+          _jenis_unit: string
+          _kode_unit: string
+          _manager_full_name?: string
+          _manager_user_id: string
+          _nama_unit: string
+          _template_id: string
+          _tenant_id: string
+        }
+        Returns: {
+          access_status: string
+          credential_id: string
+          email_virtual: string
+          login_code: string
+          manager_login_email: string
+          manager_user_id: string
+          must_change_password: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          unit_id: string
+        }[]
+      }
       create_business_unit_with_manager: {
         Args: {
           _generated_by?: string
