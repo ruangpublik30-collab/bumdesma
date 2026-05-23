@@ -1,1 +1,4 @@
 project_id = "hmcdddqlabjnknbaimdk"
+
+[functions.provision-unit-with-manager]
+verify_jwt = true

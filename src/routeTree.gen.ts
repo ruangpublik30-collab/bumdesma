@@ -37,6 +37,7 @@ import { Route as UnitDashboardUnitIdJournalRouteImport } from './routes/unit.da
 import { Route as UnitDashboardUnitIdInventoryRouteImport } from './routes/unit.dashboard.$unitId.inventory'
 import { Route as UnitDashboardUnitIdCustomersRouteImport } from './routes/unit.dashboard.$unitId.customers'
 import { Route as UnitDashboardUnitIdCashBankRouteImport } from './routes/unit.dashboard.$unitId.cash-bank'
+import { Route as BumdesDashboardUnitsCreateRouteImport } from './routes/bumdes.dashboard.units.create'
 
 const UnitsRoute = UnitsRouteImport.update({
   id: '/units',
@@ -190,6 +191,12 @@ const UnitDashboardUnitIdCashBankRoute =
     path: '/cash-bank',
     getParentRoute: () => UnitDashboardUnitIdRoute,
   } as any)
+const BumdesDashboardUnitsCreateRoute =
+  BumdesDashboardUnitsCreateRouteImport.update({
+    id: '/bumdes/dashboard/units/create',
+    path: '/bumdes/dashboard/units/create',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -208,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/platform/bumdes': typeof PlatformBumdesRoute
   '/platform/pendaftaran': typeof PlatformPendaftaranRoute
   '/unit/dashboard/$unitId': typeof UnitDashboardUnitIdRouteWithChildren
+  '/bumdes/dashboard/units/create': typeof BumdesDashboardUnitsCreateRoute
   '/unit/dashboard/$unitId/cash-bank': typeof UnitDashboardUnitIdCashBankRoute
   '/unit/dashboard/$unitId/customers': typeof UnitDashboardUnitIdCustomersRoute
   '/unit/dashboard/$unitId/inventory': typeof UnitDashboardUnitIdInventoryRoute
@@ -237,6 +245,7 @@ export interface FileRoutesByTo {
   '/laporan/neraca': typeof LaporanNeracaRoute
   '/platform/bumdes': typeof PlatformBumdesRoute
   '/platform/pendaftaran': typeof PlatformPendaftaranRoute
+  '/bumdes/dashboard/units/create': typeof BumdesDashboardUnitsCreateRoute
   '/unit/dashboard/$unitId/cash-bank': typeof UnitDashboardUnitIdCashBankRoute
   '/unit/dashboard/$unitId/customers': typeof UnitDashboardUnitIdCustomersRoute
   '/unit/dashboard/$unitId/inventory': typeof UnitDashboardUnitIdInventoryRoute
@@ -268,6 +277,7 @@ export interface FileRoutesById {
   '/platform/bumdes': typeof PlatformBumdesRoute
   '/platform/pendaftaran': typeof PlatformPendaftaranRoute
   '/unit/dashboard/$unitId': typeof UnitDashboardUnitIdRouteWithChildren
+  '/bumdes/dashboard/units/create': typeof BumdesDashboardUnitsCreateRoute
   '/unit/dashboard/$unitId/cash-bank': typeof UnitDashboardUnitIdCashBankRoute
   '/unit/dashboard/$unitId/customers': typeof UnitDashboardUnitIdCustomersRoute
   '/unit/dashboard/$unitId/inventory': typeof UnitDashboardUnitIdInventoryRoute
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/platform/bumdes'
     | '/platform/pendaftaran'
     | '/unit/dashboard/$unitId'
+    | '/bumdes/dashboard/units/create'
     | '/unit/dashboard/$unitId/cash-bank'
     | '/unit/dashboard/$unitId/customers'
     | '/unit/dashboard/$unitId/inventory'
@@ -329,6 +340,7 @@ export interface FileRouteTypes {
     | '/laporan/neraca'
     | '/platform/bumdes'
     | '/platform/pendaftaran'
+    | '/bumdes/dashboard/units/create'
     | '/unit/dashboard/$unitId/cash-bank'
     | '/unit/dashboard/$unitId/customers'
     | '/unit/dashboard/$unitId/inventory'
@@ -359,6 +371,7 @@ export interface FileRouteTypes {
     | '/platform/bumdes'
     | '/platform/pendaftaran'
     | '/unit/dashboard/$unitId'
+    | '/bumdes/dashboard/units/create'
     | '/unit/dashboard/$unitId/cash-bank'
     | '/unit/dashboard/$unitId/customers'
     | '/unit/dashboard/$unitId/inventory'
@@ -390,6 +403,7 @@ export interface RootRouteChildren {
   PlatformBumdesRoute: typeof PlatformBumdesRoute
   PlatformPendaftaranRoute: typeof PlatformPendaftaranRoute
   UnitDashboardUnitIdRoute: typeof UnitDashboardUnitIdRouteWithChildren
+  BumdesDashboardUnitsCreateRoute: typeof BumdesDashboardUnitsCreateRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -590,6 +604,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UnitDashboardUnitIdCashBankRouteImport
       parentRoute: typeof UnitDashboardUnitIdRoute
     }
+    '/bumdes/dashboard/units/create': {
+      id: '/bumdes/dashboard/units/create'
+      path: '/bumdes/dashboard/units/create'
+      fullPath: '/bumdes/dashboard/units/create'
+      preLoaderRoute: typeof BumdesDashboardUnitsCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -643,6 +664,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformBumdesRoute: PlatformBumdesRoute,
   PlatformPendaftaranRoute: PlatformPendaftaranRoute,
   UnitDashboardUnitIdRoute: UnitDashboardUnitIdRouteWithChildren,
+  BumdesDashboardUnitsCreateRoute: BumdesDashboardUnitsCreateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
