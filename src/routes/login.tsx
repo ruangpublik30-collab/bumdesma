@@ -20,19 +20,34 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
+  const routeAfterLogin = async (uid: string) => {
+    const { data } = await supabase.rpc("get_user_login_context", { _user_id: uid });
+    const ctx = (data as any[])?.[0];
+    if (!ctx) { nav({ to: "/dashboard" }); return; }
+    if (ctx.role === "super_admin_platform") { nav({ to: "/platform/pendaftaran" }); return; }
+    if (ctx.role === "direktur_bumdes" || ctx.role === "admin_bumdes") { nav({ to: "/dashboard" }); return; }
+    if (ctx.unit_id) { nav({ to: "/unit/dashboard/$unitId", params: { unitId: ctx.unit_id } }); return; }
+    nav({ to: "/dashboard" });
+  };
+
   useEffect(() => {
-    if (!loading && user) nav({ to: isPlatformAdmin ? "/platform/pendaftaran" : "/dashboard" });
-  }, [user, loading, isPlatformAdmin, nav]);
+    if (!loading && user) {
+      if (isPlatformAdmin) { nav({ to: "/platform/pendaftaran" }); return; }
+      void routeAfterLogin(user.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, loading, isPlatformAdmin]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     try {
       if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         await refreshRoles();
         toast.success("Berhasil masuk");
+        if (data.user) await routeAfterLogin(data.user.id);
       } else {
         const { error } = await supabase.auth.signUp({
           email, password,

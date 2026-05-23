@@ -24,6 +24,19 @@ import { Route as LaporanNeracaRouteImport } from './routes/laporan.neraca'
 import { Route as LaporanLabaRugiRouteImport } from './routes/laporan.laba-rugi'
 import { Route as LaporanKonsolidasiRouteImport } from './routes/laporan.konsolidasi'
 import { Route as LaporanArusKasRouteImport } from './routes/laporan.arus-kas'
+import { Route as UnitDashboardUnitIdRouteImport } from './routes/unit.dashboard.$unitId'
+import { Route as UnitDashboardUnitIdIndexRouteImport } from './routes/unit.dashboard.$unitId.index'
+import { Route as UnitDashboardUnitIdSuppliersRouteImport } from './routes/unit.dashboard.$unitId.suppliers'
+import { Route as UnitDashboardUnitIdSettingsRouteImport } from './routes/unit.dashboard.$unitId.settings'
+import { Route as UnitDashboardUnitIdSalesRouteImport } from './routes/unit.dashboard.$unitId.sales'
+import { Route as UnitDashboardUnitIdReportsRouteImport } from './routes/unit.dashboard.$unitId.reports'
+import { Route as UnitDashboardUnitIdReceivablesRouteImport } from './routes/unit.dashboard.$unitId.receivables'
+import { Route as UnitDashboardUnitIdPurchasesRouteImport } from './routes/unit.dashboard.$unitId.purchases'
+import { Route as UnitDashboardUnitIdPayablesRouteImport } from './routes/unit.dashboard.$unitId.payables'
+import { Route as UnitDashboardUnitIdJournalRouteImport } from './routes/unit.dashboard.$unitId.journal'
+import { Route as UnitDashboardUnitIdInventoryRouteImport } from './routes/unit.dashboard.$unitId.inventory'
+import { Route as UnitDashboardUnitIdCustomersRouteImport } from './routes/unit.dashboard.$unitId.customers'
+import { Route as UnitDashboardUnitIdCashBankRouteImport } from './routes/unit.dashboard.$unitId.cash-bank'
 
 const UnitsRoute = UnitsRouteImport.update({
   id: '/units',
@@ -100,6 +113,83 @@ const LaporanArusKasRoute = LaporanArusKasRouteImport.update({
   path: '/laporan/arus-kas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UnitDashboardUnitIdRoute = UnitDashboardUnitIdRouteImport.update({
+  id: '/unit/dashboard/$unitId',
+  path: '/unit/dashboard/$unitId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UnitDashboardUnitIdIndexRoute =
+  UnitDashboardUnitIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => UnitDashboardUnitIdRoute,
+  } as any)
+const UnitDashboardUnitIdSuppliersRoute =
+  UnitDashboardUnitIdSuppliersRouteImport.update({
+    id: '/suppliers',
+    path: '/suppliers',
+    getParentRoute: () => UnitDashboardUnitIdRoute,
+  } as any)
+const UnitDashboardUnitIdSettingsRoute =
+  UnitDashboardUnitIdSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => UnitDashboardUnitIdRoute,
+  } as any)
+const UnitDashboardUnitIdSalesRoute =
+  UnitDashboardUnitIdSalesRouteImport.update({
+    id: '/sales',
+    path: '/sales',
+    getParentRoute: () => UnitDashboardUnitIdRoute,
+  } as any)
+const UnitDashboardUnitIdReportsRoute =
+  UnitDashboardUnitIdReportsRouteImport.update({
+    id: '/reports',
+    path: '/reports',
+    getParentRoute: () => UnitDashboardUnitIdRoute,
+  } as any)
+const UnitDashboardUnitIdReceivablesRoute =
+  UnitDashboardUnitIdReceivablesRouteImport.update({
+    id: '/receivables',
+    path: '/receivables',
+    getParentRoute: () => UnitDashboardUnitIdRoute,
+  } as any)
+const UnitDashboardUnitIdPurchasesRoute =
+  UnitDashboardUnitIdPurchasesRouteImport.update({
+    id: '/purchases',
+    path: '/purchases',
+    getParentRoute: () => UnitDashboardUnitIdRoute,
+  } as any)
+const UnitDashboardUnitIdPayablesRoute =
+  UnitDashboardUnitIdPayablesRouteImport.update({
+    id: '/payables',
+    path: '/payables',
+    getParentRoute: () => UnitDashboardUnitIdRoute,
+  } as any)
+const UnitDashboardUnitIdJournalRoute =
+  UnitDashboardUnitIdJournalRouteImport.update({
+    id: '/journal',
+    path: '/journal',
+    getParentRoute: () => UnitDashboardUnitIdRoute,
+  } as any)
+const UnitDashboardUnitIdInventoryRoute =
+  UnitDashboardUnitIdInventoryRouteImport.update({
+    id: '/inventory',
+    path: '/inventory',
+    getParentRoute: () => UnitDashboardUnitIdRoute,
+  } as any)
+const UnitDashboardUnitIdCustomersRoute =
+  UnitDashboardUnitIdCustomersRouteImport.update({
+    id: '/customers',
+    path: '/customers',
+    getParentRoute: () => UnitDashboardUnitIdRoute,
+  } as any)
+const UnitDashboardUnitIdCashBankRoute =
+  UnitDashboardUnitIdCashBankRouteImport.update({
+    id: '/cash-bank',
+    path: '/cash-bank',
+    getParentRoute: () => UnitDashboardUnitIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,6 +207,19 @@ export interface FileRoutesByFullPath {
   '/laporan/neraca': typeof LaporanNeracaRoute
   '/platform/bumdes': typeof PlatformBumdesRoute
   '/platform/pendaftaran': typeof PlatformPendaftaranRoute
+  '/unit/dashboard/$unitId': typeof UnitDashboardUnitIdRouteWithChildren
+  '/unit/dashboard/$unitId/cash-bank': typeof UnitDashboardUnitIdCashBankRoute
+  '/unit/dashboard/$unitId/customers': typeof UnitDashboardUnitIdCustomersRoute
+  '/unit/dashboard/$unitId/inventory': typeof UnitDashboardUnitIdInventoryRoute
+  '/unit/dashboard/$unitId/journal': typeof UnitDashboardUnitIdJournalRoute
+  '/unit/dashboard/$unitId/payables': typeof UnitDashboardUnitIdPayablesRoute
+  '/unit/dashboard/$unitId/purchases': typeof UnitDashboardUnitIdPurchasesRoute
+  '/unit/dashboard/$unitId/receivables': typeof UnitDashboardUnitIdReceivablesRoute
+  '/unit/dashboard/$unitId/reports': typeof UnitDashboardUnitIdReportsRoute
+  '/unit/dashboard/$unitId/sales': typeof UnitDashboardUnitIdSalesRoute
+  '/unit/dashboard/$unitId/settings': typeof UnitDashboardUnitIdSettingsRoute
+  '/unit/dashboard/$unitId/suppliers': typeof UnitDashboardUnitIdSuppliersRoute
+  '/unit/dashboard/$unitId/': typeof UnitDashboardUnitIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -134,6 +237,18 @@ export interface FileRoutesByTo {
   '/laporan/neraca': typeof LaporanNeracaRoute
   '/platform/bumdes': typeof PlatformBumdesRoute
   '/platform/pendaftaran': typeof PlatformPendaftaranRoute
+  '/unit/dashboard/$unitId/cash-bank': typeof UnitDashboardUnitIdCashBankRoute
+  '/unit/dashboard/$unitId/customers': typeof UnitDashboardUnitIdCustomersRoute
+  '/unit/dashboard/$unitId/inventory': typeof UnitDashboardUnitIdInventoryRoute
+  '/unit/dashboard/$unitId/journal': typeof UnitDashboardUnitIdJournalRoute
+  '/unit/dashboard/$unitId/payables': typeof UnitDashboardUnitIdPayablesRoute
+  '/unit/dashboard/$unitId/purchases': typeof UnitDashboardUnitIdPurchasesRoute
+  '/unit/dashboard/$unitId/receivables': typeof UnitDashboardUnitIdReceivablesRoute
+  '/unit/dashboard/$unitId/reports': typeof UnitDashboardUnitIdReportsRoute
+  '/unit/dashboard/$unitId/sales': typeof UnitDashboardUnitIdSalesRoute
+  '/unit/dashboard/$unitId/settings': typeof UnitDashboardUnitIdSettingsRoute
+  '/unit/dashboard/$unitId/suppliers': typeof UnitDashboardUnitIdSuppliersRoute
+  '/unit/dashboard/$unitId': typeof UnitDashboardUnitIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,6 +267,19 @@ export interface FileRoutesById {
   '/laporan/neraca': typeof LaporanNeracaRoute
   '/platform/bumdes': typeof PlatformBumdesRoute
   '/platform/pendaftaran': typeof PlatformPendaftaranRoute
+  '/unit/dashboard/$unitId': typeof UnitDashboardUnitIdRouteWithChildren
+  '/unit/dashboard/$unitId/cash-bank': typeof UnitDashboardUnitIdCashBankRoute
+  '/unit/dashboard/$unitId/customers': typeof UnitDashboardUnitIdCustomersRoute
+  '/unit/dashboard/$unitId/inventory': typeof UnitDashboardUnitIdInventoryRoute
+  '/unit/dashboard/$unitId/journal': typeof UnitDashboardUnitIdJournalRoute
+  '/unit/dashboard/$unitId/payables': typeof UnitDashboardUnitIdPayablesRoute
+  '/unit/dashboard/$unitId/purchases': typeof UnitDashboardUnitIdPurchasesRoute
+  '/unit/dashboard/$unitId/receivables': typeof UnitDashboardUnitIdReceivablesRoute
+  '/unit/dashboard/$unitId/reports': typeof UnitDashboardUnitIdReportsRoute
+  '/unit/dashboard/$unitId/sales': typeof UnitDashboardUnitIdSalesRoute
+  '/unit/dashboard/$unitId/settings': typeof UnitDashboardUnitIdSettingsRoute
+  '/unit/dashboard/$unitId/suppliers': typeof UnitDashboardUnitIdSuppliersRoute
+  '/unit/dashboard/$unitId/': typeof UnitDashboardUnitIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +299,19 @@ export interface FileRouteTypes {
     | '/laporan/neraca'
     | '/platform/bumdes'
     | '/platform/pendaftaran'
+    | '/unit/dashboard/$unitId'
+    | '/unit/dashboard/$unitId/cash-bank'
+    | '/unit/dashboard/$unitId/customers'
+    | '/unit/dashboard/$unitId/inventory'
+    | '/unit/dashboard/$unitId/journal'
+    | '/unit/dashboard/$unitId/payables'
+    | '/unit/dashboard/$unitId/purchases'
+    | '/unit/dashboard/$unitId/receivables'
+    | '/unit/dashboard/$unitId/reports'
+    | '/unit/dashboard/$unitId/sales'
+    | '/unit/dashboard/$unitId/settings'
+    | '/unit/dashboard/$unitId/suppliers'
+    | '/unit/dashboard/$unitId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -188,6 +329,18 @@ export interface FileRouteTypes {
     | '/laporan/neraca'
     | '/platform/bumdes'
     | '/platform/pendaftaran'
+    | '/unit/dashboard/$unitId/cash-bank'
+    | '/unit/dashboard/$unitId/customers'
+    | '/unit/dashboard/$unitId/inventory'
+    | '/unit/dashboard/$unitId/journal'
+    | '/unit/dashboard/$unitId/payables'
+    | '/unit/dashboard/$unitId/purchases'
+    | '/unit/dashboard/$unitId/receivables'
+    | '/unit/dashboard/$unitId/reports'
+    | '/unit/dashboard/$unitId/sales'
+    | '/unit/dashboard/$unitId/settings'
+    | '/unit/dashboard/$unitId/suppliers'
+    | '/unit/dashboard/$unitId'
   id:
     | '__root__'
     | '/'
@@ -205,6 +358,19 @@ export interface FileRouteTypes {
     | '/laporan/neraca'
     | '/platform/bumdes'
     | '/platform/pendaftaran'
+    | '/unit/dashboard/$unitId'
+    | '/unit/dashboard/$unitId/cash-bank'
+    | '/unit/dashboard/$unitId/customers'
+    | '/unit/dashboard/$unitId/inventory'
+    | '/unit/dashboard/$unitId/journal'
+    | '/unit/dashboard/$unitId/payables'
+    | '/unit/dashboard/$unitId/purchases'
+    | '/unit/dashboard/$unitId/receivables'
+    | '/unit/dashboard/$unitId/reports'
+    | '/unit/dashboard/$unitId/sales'
+    | '/unit/dashboard/$unitId/settings'
+    | '/unit/dashboard/$unitId/suppliers'
+    | '/unit/dashboard/$unitId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -223,6 +389,7 @@ export interface RootRouteChildren {
   LaporanNeracaRoute: typeof LaporanNeracaRoute
   PlatformBumdesRoute: typeof PlatformBumdesRoute
   PlatformPendaftaranRoute: typeof PlatformPendaftaranRoute
+  UnitDashboardUnitIdRoute: typeof UnitDashboardUnitIdRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -332,8 +499,132 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LaporanArusKasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/unit/dashboard/$unitId': {
+      id: '/unit/dashboard/$unitId'
+      path: '/unit/dashboard/$unitId'
+      fullPath: '/unit/dashboard/$unitId'
+      preLoaderRoute: typeof UnitDashboardUnitIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/unit/dashboard/$unitId/': {
+      id: '/unit/dashboard/$unitId/'
+      path: '/'
+      fullPath: '/unit/dashboard/$unitId/'
+      preLoaderRoute: typeof UnitDashboardUnitIdIndexRouteImport
+      parentRoute: typeof UnitDashboardUnitIdRoute
+    }
+    '/unit/dashboard/$unitId/suppliers': {
+      id: '/unit/dashboard/$unitId/suppliers'
+      path: '/suppliers'
+      fullPath: '/unit/dashboard/$unitId/suppliers'
+      preLoaderRoute: typeof UnitDashboardUnitIdSuppliersRouteImport
+      parentRoute: typeof UnitDashboardUnitIdRoute
+    }
+    '/unit/dashboard/$unitId/settings': {
+      id: '/unit/dashboard/$unitId/settings'
+      path: '/settings'
+      fullPath: '/unit/dashboard/$unitId/settings'
+      preLoaderRoute: typeof UnitDashboardUnitIdSettingsRouteImport
+      parentRoute: typeof UnitDashboardUnitIdRoute
+    }
+    '/unit/dashboard/$unitId/sales': {
+      id: '/unit/dashboard/$unitId/sales'
+      path: '/sales'
+      fullPath: '/unit/dashboard/$unitId/sales'
+      preLoaderRoute: typeof UnitDashboardUnitIdSalesRouteImport
+      parentRoute: typeof UnitDashboardUnitIdRoute
+    }
+    '/unit/dashboard/$unitId/reports': {
+      id: '/unit/dashboard/$unitId/reports'
+      path: '/reports'
+      fullPath: '/unit/dashboard/$unitId/reports'
+      preLoaderRoute: typeof UnitDashboardUnitIdReportsRouteImport
+      parentRoute: typeof UnitDashboardUnitIdRoute
+    }
+    '/unit/dashboard/$unitId/receivables': {
+      id: '/unit/dashboard/$unitId/receivables'
+      path: '/receivables'
+      fullPath: '/unit/dashboard/$unitId/receivables'
+      preLoaderRoute: typeof UnitDashboardUnitIdReceivablesRouteImport
+      parentRoute: typeof UnitDashboardUnitIdRoute
+    }
+    '/unit/dashboard/$unitId/purchases': {
+      id: '/unit/dashboard/$unitId/purchases'
+      path: '/purchases'
+      fullPath: '/unit/dashboard/$unitId/purchases'
+      preLoaderRoute: typeof UnitDashboardUnitIdPurchasesRouteImport
+      parentRoute: typeof UnitDashboardUnitIdRoute
+    }
+    '/unit/dashboard/$unitId/payables': {
+      id: '/unit/dashboard/$unitId/payables'
+      path: '/payables'
+      fullPath: '/unit/dashboard/$unitId/payables'
+      preLoaderRoute: typeof UnitDashboardUnitIdPayablesRouteImport
+      parentRoute: typeof UnitDashboardUnitIdRoute
+    }
+    '/unit/dashboard/$unitId/journal': {
+      id: '/unit/dashboard/$unitId/journal'
+      path: '/journal'
+      fullPath: '/unit/dashboard/$unitId/journal'
+      preLoaderRoute: typeof UnitDashboardUnitIdJournalRouteImport
+      parentRoute: typeof UnitDashboardUnitIdRoute
+    }
+    '/unit/dashboard/$unitId/inventory': {
+      id: '/unit/dashboard/$unitId/inventory'
+      path: '/inventory'
+      fullPath: '/unit/dashboard/$unitId/inventory'
+      preLoaderRoute: typeof UnitDashboardUnitIdInventoryRouteImport
+      parentRoute: typeof UnitDashboardUnitIdRoute
+    }
+    '/unit/dashboard/$unitId/customers': {
+      id: '/unit/dashboard/$unitId/customers'
+      path: '/customers'
+      fullPath: '/unit/dashboard/$unitId/customers'
+      preLoaderRoute: typeof UnitDashboardUnitIdCustomersRouteImport
+      parentRoute: typeof UnitDashboardUnitIdRoute
+    }
+    '/unit/dashboard/$unitId/cash-bank': {
+      id: '/unit/dashboard/$unitId/cash-bank'
+      path: '/cash-bank'
+      fullPath: '/unit/dashboard/$unitId/cash-bank'
+      preLoaderRoute: typeof UnitDashboardUnitIdCashBankRouteImport
+      parentRoute: typeof UnitDashboardUnitIdRoute
+    }
   }
 }
+
+interface UnitDashboardUnitIdRouteChildren {
+  UnitDashboardUnitIdCashBankRoute: typeof UnitDashboardUnitIdCashBankRoute
+  UnitDashboardUnitIdCustomersRoute: typeof UnitDashboardUnitIdCustomersRoute
+  UnitDashboardUnitIdInventoryRoute: typeof UnitDashboardUnitIdInventoryRoute
+  UnitDashboardUnitIdJournalRoute: typeof UnitDashboardUnitIdJournalRoute
+  UnitDashboardUnitIdPayablesRoute: typeof UnitDashboardUnitIdPayablesRoute
+  UnitDashboardUnitIdPurchasesRoute: typeof UnitDashboardUnitIdPurchasesRoute
+  UnitDashboardUnitIdReceivablesRoute: typeof UnitDashboardUnitIdReceivablesRoute
+  UnitDashboardUnitIdReportsRoute: typeof UnitDashboardUnitIdReportsRoute
+  UnitDashboardUnitIdSalesRoute: typeof UnitDashboardUnitIdSalesRoute
+  UnitDashboardUnitIdSettingsRoute: typeof UnitDashboardUnitIdSettingsRoute
+  UnitDashboardUnitIdSuppliersRoute: typeof UnitDashboardUnitIdSuppliersRoute
+  UnitDashboardUnitIdIndexRoute: typeof UnitDashboardUnitIdIndexRoute
+}
+
+const UnitDashboardUnitIdRouteChildren: UnitDashboardUnitIdRouteChildren = {
+  UnitDashboardUnitIdCashBankRoute: UnitDashboardUnitIdCashBankRoute,
+  UnitDashboardUnitIdCustomersRoute: UnitDashboardUnitIdCustomersRoute,
+  UnitDashboardUnitIdInventoryRoute: UnitDashboardUnitIdInventoryRoute,
+  UnitDashboardUnitIdJournalRoute: UnitDashboardUnitIdJournalRoute,
+  UnitDashboardUnitIdPayablesRoute: UnitDashboardUnitIdPayablesRoute,
+  UnitDashboardUnitIdPurchasesRoute: UnitDashboardUnitIdPurchasesRoute,
+  UnitDashboardUnitIdReceivablesRoute: UnitDashboardUnitIdReceivablesRoute,
+  UnitDashboardUnitIdReportsRoute: UnitDashboardUnitIdReportsRoute,
+  UnitDashboardUnitIdSalesRoute: UnitDashboardUnitIdSalesRoute,
+  UnitDashboardUnitIdSettingsRoute: UnitDashboardUnitIdSettingsRoute,
+  UnitDashboardUnitIdSuppliersRoute: UnitDashboardUnitIdSuppliersRoute,
+  UnitDashboardUnitIdIndexRoute: UnitDashboardUnitIdIndexRoute,
+}
+
+const UnitDashboardUnitIdRouteWithChildren =
+  UnitDashboardUnitIdRoute._addFileChildren(UnitDashboardUnitIdRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -351,6 +642,7 @@ const rootRouteChildren: RootRouteChildren = {
   LaporanNeracaRoute: LaporanNeracaRoute,
   PlatformBumdesRoute: PlatformBumdesRoute,
   PlatformPendaftaranRoute: PlatformPendaftaranRoute,
+  UnitDashboardUnitIdRoute: UnitDashboardUnitIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
