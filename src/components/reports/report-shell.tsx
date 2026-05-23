@@ -38,15 +38,16 @@ export function ReportShell({ title, subtitle, bumdes, periodLabel, children }: 
     try {
       const html2pdf = (await import("html2pdf.js")).default;
       const filename = `${slugify(title)}-${slugify(bumdes.nama_bumdes ?? "bumdes")}-${Date.now()}.pdf`;
+      const opts = {
+        margin: 0,
+        filename,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["css", "legacy"] },
+      } as unknown as Parameters<ReturnType<typeof html2pdf>["set"]>[0];
       await html2pdf()
-        .set({
-          margin: 0,
-          filename,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-          pagebreak: { mode: ["css", "legacy"] },
-        })
+        .set(opts)
         .from(printRef.current)
         .save();
     } catch (err) {
