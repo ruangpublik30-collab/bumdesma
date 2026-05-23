@@ -29,7 +29,7 @@ function Page() {
   const active = isTenantAdmin ? sel : unitId;
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between gap-3 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 min-w-0">
         <div>
           <h2 className="font-display text-2xl font-bold">Pembelian</h2>
           <p className="text-sm text-muted-foreground">Penerimaan barang & pembayaran ke pemasok. Posting otomatis ke jurnal & stok.</p>
