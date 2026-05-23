@@ -85,7 +85,7 @@ function UnitsPage() {
     try {
       const { data, error } = await supabase.rpc("create_business_unit_with_manager", {
         _tenant_id: tenantId,
-        _template_id: form.template_id || null,
+        _template_id: form.template_id || (null as unknown as string),
         _kode_unit: form.kode_unit.trim().toUpperCase(),
         _nama_unit: form.nama_unit.trim(),
         _jenis_unit: form.jenis_unit,
