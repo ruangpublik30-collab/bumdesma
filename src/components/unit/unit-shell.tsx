@@ -229,9 +229,10 @@ export function UnitShell({ unitId, children }: { unitId: string; children: Reac
       </header>
 
       {/* Main content */}
-      <main className="md:ml-[260px] pt-[72px] min-h-screen">
-        <div className="p-4 md:p-6 lg:p-8">{children}</div>
+      <main className="lg:ml-[260px] pt-[88px] min-h-screen w-full max-w-full min-w-0 overflow-x-hidden">
+        <div className="px-4 sm:px-5 lg:px-8 pb-8">{children}</div>
       </main>
+
     </div>
   );
 }
