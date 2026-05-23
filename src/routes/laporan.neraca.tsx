@@ -5,71 +5,86 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getBalanceSheet } from "@/lib/reports.functions";
-import { formatIDR } from "@/lib/format";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
+import { ReportShell } from "@/components/reports/report-shell";
+import { NeracaStaffel, BSRow } from "@/components/reports/neraca-staffel";
 
 export const Route = createFileRoute("/laporan/neraca")({
   head: () => ({ meta: [{ title: "Laporan Neraca — ERP BUMDes" }] }),
   component: () => <Protected><NeracaPage /></Protected>,
 });
 
-function Group({ title, rows }: { title: string; rows: any[] }) {
-  return (
-    <div className="mb-3">
-      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">{title}</div>
-      {rows.length === 0 && <div className="text-sm text-muted-foreground py-1">—</div>}
-      {rows.map((r) => (
-        <div key={r.account_id} className="flex justify-between py-1 text-sm border-b">
-          <span><span className="font-mono text-xs text-muted-foreground mr-2">{r.kode}</span>{r.nama}</span>
-          <span>{formatIDR(r.saldo)}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function NeracaPage() {
   const def = useDefaultFilter();
   const [filter, setFilter] = useState(def);
   const fn = useServerFn(getBalanceSheet);
+  const { tenantId } = useAuth();
+
   const { data, isLoading } = useQuery({
     queryKey: ["bs", filter],
     queryFn: () => fn({ data: filter }),
   });
 
+  const { data: header } = useQuery({
+    queryKey: ["bs-header", filter.unit_id, tenantId],
+    queryFn: async () => {
+      if (filter.unit_id) {
+        const r = await supabase
+          .from("business_units")
+          .select("nama_unit, tenant:tenants(nama_bumdes, nama_desa, nama_kecamatan)")
+          .eq("id", filter.unit_id)
+          .maybeSingle();
+        const u: any = r.data;
+        return {
+          nama_bumdes: u?.tenant?.nama_bumdes,
+          nama_desa: u?.tenant?.nama_desa,
+          nama_kecamatan: u?.tenant?.nama_kecamatan,
+          nama_unit: u?.nama_unit,
+        };
+      }
+      if (tenantId) {
+        const r = await supabase.from("tenants").select("nama_bumdes, nama_desa, nama_kecamatan").eq("id", tenantId).maybeSingle();
+        return { ...(r.data as any), nama_unit: "Konsolidasi Seluruh Unit" };
+      }
+      return {};
+    },
+  });
+
+  // Map server-fn output -> BSRow (account_code/account_name/aset/kewajiban/ekuitas)
+  const rows: BSRow[] = data
+    ? [
+        ...data.aset.map((a: any) => ({
+          account_code: a.kode, account_name: a.nama, account_type: "aset", aset: a.saldo,
+        })),
+        ...data.kewajiban.map((a: any) => ({
+          account_code: a.kode, account_name: a.nama, account_type: "kewajiban", kewajiban: a.saldo,
+        })),
+        ...data.ekuitas.map((a: any) => ({
+          account_code: a.kode, account_name: a.nama, account_type: "ekuitas", ekuitas: a.saldo,
+        })),
+      ]
+    : [];
+
   return (
     <div className="space-y-6">
-      <div>
+      <div className="no-print">
         <h2 className="font-display text-2xl font-bold">Laporan Neraca</h2>
         <p className="text-sm text-muted-foreground">Per tanggal {filter.end_date}</p>
       </div>
-      <ReportFilter value={filter} onChange={setFilter} />
+      <div className="no-print"><ReportFilter value={filter} onChange={setFilter} /></div>
+
       {isLoading || !data ? (
         <div className="text-center text-muted-foreground py-10">Memuat…</div>
       ) : (
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="rounded-lg border bg-card p-6">
-            <h3 className="font-display font-semibold mb-3">AKTIVA</h3>
-            <Group title="Aset" rows={data.aset} />
-            <div className="flex justify-between py-3 mt-2 px-3 rounded bg-primary/10 font-semibold">
-              <span>Total Aktiva</span><span>{formatIDR(data.totalAset)}</span>
-            </div>
-          </div>
-          <div className="rounded-lg border bg-card p-6">
-            <h3 className="font-display font-semibold mb-3">PASIVA</h3>
-            <Group title="Kewajiban" rows={data.kewajiban} />
-            <Group title="Ekuitas" rows={data.ekuitas} />
-            <div className="flex justify-between py-1 text-sm border-b">
-              <span>Laba (Rugi) Berjalan</span>
-              <span>{formatIDR(data.labaBerjalan)}</span>
-            </div>
-            <div className="flex justify-between py-3 mt-2 px-3 rounded bg-primary/10 font-semibold">
-              <span>Total Pasiva</span><span>{formatIDR(data.totalPasiva)}</span>
-            </div>
-            {Math.abs(data.totalAset - data.totalPasiva) > 0.5 && (
-              <p className="mt-3 text-xs text-warning">⚠ Aktiva dan Pasiva belum seimbang — periksa kembali jurnal Anda.</p>
-            )}
-          </div>
-        </div>
+        <ReportShell
+          title="Laporan Neraca"
+          subtitle="Bentuk Staffel"
+          bumdes={header ?? {}}
+          periodLabel={`Per tanggal ${new Intl.DateTimeFormat("id-ID", { dateStyle: "long" }).format(new Date(filter.end_date))}`}
+        >
+          <NeracaStaffel rows={rows} labaBerjalan={data.labaBerjalan} />
+        </ReportShell>
       )}
     </div>
   );
