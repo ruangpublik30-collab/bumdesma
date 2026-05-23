@@ -31,9 +31,9 @@ function PurchasesPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("goods_receipts")
-        .select("id, nomor_gr, tanggal_gr, status, payment_status, supplier:suppliers(nama_supplier), lines:goods_receipt_lines(subtotal)")
+        .select("id, nomor_gr, tanggal_terima, status, payment_method, supplier:suppliers(nama_supplier), lines:goods_receipt_lines(subtotal)")
         .eq("unit_id", unitId)
-        .order("tanggal_gr", { ascending: false })
+        .order("tanggal_terima", { ascending: false })
         .limit(200);
       return (data ?? []).map((g: any) => ({ ...g, total: (g.lines ?? []).reduce((s: number, l: any) => s + Number(l.subtotal ?? 0), 0) }));
     },
@@ -41,7 +41,7 @@ function PurchasesPage() {
 
   const post = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.rpc("post_goods_receipt", { p_gr_id: id });
+      const { error } = await supabase.rpc("post_goods_receipt", { p_goods_receipt_id: id });
       if (error) throw error;
     },
     onSuccess: () => { toast.success("GR diposting & stok diupdate"); invalidate(); },
@@ -53,19 +53,19 @@ function PurchasesPage() {
       <div className="flex items-end justify-between flex-wrap gap-3">
         <div>
           <h2 className="font-display text-2xl font-bold">Pembelian / Goods Receipt</h2>
-          <p className="text-sm text-muted-foreground">Buat draft penerimaan barang, lalu posting untuk update stok & utang otomatis.</p>
+          <p className="text-sm text-muted-foreground">Buat draft penerimaan barang (PO + GR otomatis), lalu posting untuk update stok & jurnal.</p>
         </div>
         <CreateGrDialog unitId={unitId} onSuccess={invalidate} />
       </div>
       <div className="rounded-lg border bg-card overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-secondary"><tr className="text-left">
-            <th className="px-4 py-3 font-medium">Nomor</th>
+            <th className="px-4 py-3 font-medium">Nomor GR</th>
             <th className="px-4 py-3 font-medium">Tanggal</th>
             <th className="px-4 py-3 font-medium">Supplier</th>
+            <th className="px-4 py-3 font-medium">Metode</th>
             <th className="px-4 py-3 font-medium text-right">Total</th>
             <th className="px-4 py-3 font-medium">Status</th>
-            <th className="px-4 py-3 font-medium">Pembayaran</th>
             <th className="px-4 py-3 font-medium text-right">Aksi</th>
           </tr></thead>
           <tbody className="divide-y">
@@ -74,11 +74,11 @@ function PurchasesPage() {
             {(data ?? []).map((g: any) => (
               <tr key={g.id}>
                 <td className="px-4 py-3 font-mono text-xs">{g.nomor_gr}</td>
-                <td className="px-4 py-3">{formatDate(g.tanggal_gr)}</td>
+                <td className="px-4 py-3">{formatDate(g.tanggal_terima)}</td>
                 <td className="px-4 py-3">{g.supplier?.nama_supplier ?? "—"}</td>
+                <td className="px-4 py-3 capitalize">{g.payment_method}</td>
                 <td className="px-4 py-3 text-right">{formatIDR(g.total)}</td>
                 <td className="px-4 py-3"><StatusBadge value={g.status} /></td>
-                <td className="px-4 py-3"><StatusBadge value={g.payment_status} /></td>
                 <td className="px-4 py-3 text-right">
                   {String(g.status).toLowerCase() === "draft" && (
                     <Button size="sm" disabled={post.isPending} onClick={() => post.mutate(g.id)}>
@@ -101,7 +101,7 @@ function CreateGrDialog({ unitId, onSuccess }: { unitId: string; onSuccess: () =
   const [open, setOpen] = useState(false);
   const [supplierId, setSupplierId] = useState("");
   const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10));
-  const [paymentTerm, setPaymentTerm] = useState<"cash" | "credit">("credit");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "credit">("credit");
   const [lines, setLines] = useState<Line[]>([{ item_id: "", qty: "1", harga_beli: "0" }]);
 
   const { data: suppliers } = useQuery({
@@ -117,32 +117,58 @@ function CreateGrDialog({ unitId, onSuccess }: { unitId: string; onSuccess: () =
 
   const m = useMutation({
     mutationFn: async () => {
-      const nomor = `GR-${Date.now()}`;
-      const { data: gr, error } = await supabase.from("goods_receipts").insert({
+      const ts = Date.now();
+      // 1) Create Purchase Order
+      const { data: po, error: ePo } = await supabase.from("purchase_orders").insert({
         unit_id: unitId,
-        supplier_id: supplierId,
-        nomor_gr: nomor,
-        tanggal_gr: tanggal,
-        payment_term: paymentTerm,
+        supplier_id: supplierId || null,
+        nomor_po: `PO-${ts}`,
+        tanggal_po: tanggal,
+        status: "confirmed",
+      }).select("id").single();
+      if (ePo) throw ePo;
+
+      const validLines = lines.filter((l) => l.item_id && Number(l.qty) > 0);
+      if (validLines.length === 0) throw new Error("Minimal 1 baris barang");
+
+      const { data: poLines, error: ePoLines } = await supabase.from("purchase_order_lines").insert(
+        validLines.map((l) => ({
+          purchase_order_id: po!.id,
+          item_id: l.item_id,
+          qty_ordered: Number(l.qty),
+          harga_beli: Number(l.harga_beli),
+        }))
+      ).select("id, item_id");
+      if (ePoLines) throw ePoLines;
+
+      // 2) Create Goods Receipt
+      const { data: gr, error: eGr } = await supabase.from("goods_receipts").insert({
+        unit_id: unitId,
+        purchase_order_id: po!.id,
+        supplier_id: supplierId || null,
+        nomor_gr: `GR-${ts}`,
+        tanggal_terima: tanggal,
+        payment_method: paymentMethod,
         status: "draft",
       }).select("id").single();
-      if (error) throw error;
+      if (eGr) throw eGr;
 
-      const payload = lines
-        .filter((l) => l.item_id && Number(l.qty) > 0)
-        .map((l) => ({
-          gr_id: gr!.id,
+      // 3) GR lines tied to PO lines
+      const grLines = validLines.map((l) => {
+        const pol = (poLines ?? []).find((p: any) => p.item_id === l.item_id);
+        return {
+          goods_receipt_id: gr!.id,
+          purchase_order_line_id: pol?.id ?? null,
           item_id: l.item_id,
-          qty: Number(l.qty),
-          harga_beli: Number(l.harga_beli),
-          subtotal: Number(l.qty) * Number(l.harga_beli),
-        }));
-      if (payload.length === 0) throw new Error("Minimal 1 baris barang");
-      const { error: e2 } = await supabase.from("goods_receipt_lines").insert(payload);
-      if (e2) throw e2;
+          qty_received: Number(l.qty),
+          harga_pokok: Number(l.harga_beli),
+        };
+      });
+      const { error: eGrl } = await supabase.from("goods_receipt_lines").insert(grLines);
+      if (eGrl) throw eGrl;
     },
     onSuccess: () => {
-      toast.success("Draft GR dibuat. Klik Posting untuk update stok & utang.");
+      toast.success("Draft GR dibuat. Klik Posting untuk update stok & jurnal.");
       setOpen(false);
       setLines([{ item_id: "", qty: "1", harga_beli: "0" }]);
       setSupplierId("");
@@ -161,7 +187,7 @@ function CreateGrDialog({ unitId, onSuccess }: { unitId: string; onSuccess: () =
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" />Buat GR Baru</Button></DialogTrigger>
       <DialogContent className="max-w-2xl">
-        <DialogHeader><DialogTitle>Goods Receipt Baru</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Penerimaan Barang Baru</DialogTitle></DialogHeader>
         <div className="grid grid-cols-3 gap-3">
           <div className="space-y-1.5"><Label>Tanggal</Label><Input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} /></div>
           <div className="col-span-2 space-y-1.5"><Label>Supplier</Label>
@@ -170,8 +196,8 @@ function CreateGrDialog({ unitId, onSuccess }: { unitId: string; onSuccess: () =
               <SelectContent>{(suppliers ?? []).map((s: any) => <SelectItem key={s.id} value={s.id}>{s.nama_supplier}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5"><Label>Term Pembayaran</Label>
-            <Select value={paymentTerm} onValueChange={(v: any) => setPaymentTerm(v)}>
+          <div className="space-y-1.5"><Label>Metode Pembayaran</Label>
+            <Select value={paymentMethod} onValueChange={(v: any) => setPaymentMethod(v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="credit">Credit (jadi Utang)</SelectItem>
