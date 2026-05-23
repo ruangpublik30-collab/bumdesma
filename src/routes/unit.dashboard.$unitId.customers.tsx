@@ -23,7 +23,7 @@ function CustomersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:flex-wrap min-w-0">
         <div>
           <h2 className="font-display text-2xl font-bold">Pelanggan</h2>
           <p className="text-sm text-muted-foreground">Master data pelanggan unit ini.</p>
