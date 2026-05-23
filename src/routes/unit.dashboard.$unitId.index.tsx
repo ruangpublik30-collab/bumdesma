@@ -9,29 +9,30 @@ export const Route = createFileRoute("/unit/dashboard/$unitId/")({
 });
 
 type Tone = "green" | "blue" | "orange" | "violet";
-const toneMap: Record<Tone, { iconBg: string; iconColor: string }> = {
-  green:  { iconBg: "bg-[#DCFCE7]", iconColor: "text-[#16A34A]" },
-  blue:   { iconBg: "bg-[#DBEAFE]", iconColor: "text-[#2563EB]" },
-  orange: { iconBg: "bg-[#FED7AA]", iconColor: "text-[#F97316]" },
-  violet: { iconBg: "bg-[#EDE9FE]", iconColor: "text-[#7C3AED]" },
+const toneMap: Record<Tone, { iconBg: string; iconColor: string; ring: string }> = {
+  green:  { iconBg: "bg-[#DCFCE7]", iconColor: "text-[#16A34A]", ring: "ring-[#BBF7D0]" },
+  blue:   { iconBg: "bg-[#DBEAFE]", iconColor: "text-[#2563EB]", ring: "ring-[#BFDBFE]" },
+  orange: { iconBg: "bg-[#FED7AA]", iconColor: "text-[#F97316]", ring: "ring-[#FDBA74]" },
+  violet: { iconBg: "bg-[#EDE9FE]", iconColor: "text-[#7C3AED]", ring: "ring-[#DDD6FE]" },
 };
 
 function Stat({ label, value, icon: Icon, tone = "green" }: { label: string; value: string; icon: any; tone?: Tone }) {
   const t = toneMap[tone];
   return (
-    <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <div className="text-[12px] text-[#6B7280] uppercase tracking-wide font-semibold">{label}</div>
-          <div className="mt-2 font-display text-[22px] md:text-[24px] font-bold text-[#111827] truncate">{value}</div>
+    <div className="w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-[#BBF7D0] bg-gradient-to-br from-white to-[#F0FDF4] p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between gap-3 min-w-0">
+        <div className="min-w-0 flex-1">
+          <div className="text-[12px] text-[#6B7280] uppercase tracking-wide font-semibold truncate">{label}</div>
+          <div className="mt-2 font-display text-[20px] sm:text-[22px] lg:text-[24px] font-bold text-[#111827] break-words">{value}</div>
         </div>
-        <div className={`h-11 w-11 rounded-xl grid place-items-center ${t.iconBg}`}>
+        <div className={`h-10 w-10 sm:h-11 sm:w-11 rounded-xl grid place-items-center shrink-0 ring-1 ${t.iconBg} ${t.ring}`}>
           <Icon className={`h-5 w-5 ${t.iconColor}`} />
         </div>
       </div>
     </div>
   );
 }
+
 
 function num(v: any) { return Number(v ?? 0); }
 
